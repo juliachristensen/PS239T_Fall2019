@@ -49,7 +49,7 @@ We will use bCourses for communication (announcements and questions) and turning
 
 ### GitHub
 
-All course materials will be posted on Github at https://github.com/juliachristensen/PS239T_Fall2019, including class notes, code demonstrations, sample data, and assignments. Students are required to use GitHub for their final projects, which will be publically available, unless they have special considerations (e.g. proprietary data). 
+All course materials will be posted on Github at https://github.com/juliachristensen/PS239T_Fall2019, including class notes, code demonstrations, sample data, and assignments. Students are required to use GitHub for their final projects, which will be publicly available, unless they have special considerations (e.g. proprietary data). 
 
 ### Accessibility
 
