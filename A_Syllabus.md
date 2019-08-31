@@ -42,7 +42,7 @@ Wednesday 2-4 pm
 
 ### Office Hours
 
-By appointment with Jae Yeon Kim (email or bCourses to set up), 715 Barrows.
+By appointment. 
 
 ### bCourses
 
