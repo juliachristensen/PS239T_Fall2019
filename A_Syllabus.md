@@ -66,22 +66,23 @@ This is a graded class based on the following:
 
 Weekly assignments will be due as follows:
 
-| Date				| Assignment			|
-| ----------------------------- | ----------------------------- |
-| Thursday, August 29		| Fill out survey 		|
-| Tuesday, September 3 		| Bash/Unix/Git Online Tutorial | 
-| Wednesday, September 4	| Submit proof of installation 	| 
-| Sunday, September 8		| R datacamp tutorial(s)	| 
-| Sunday, September 15		| Python datacamp tutorial(s)	| 
-| Sunday, September 22		| More datacamp tutorial(s)	| 
-| Sunday, September 29		| Database exploration 		|
-| Sunday, October 6		| Final project proposal	|
-| Sunday, October 13		| API/Webscraping project	|
-| Sunday, October 20		| Data cleaning project		|
-| Sunday, October 27		| Data visualization project	|
-| Sunday, November 3		| Final project update		|
-| November 25-December 4	| Final project presentations	| 
-| Wednesday, December 11	| Final projects due 		| 
+| Date				| Assignment				|
+| ----------------------------- | ----------------------------- 	|
+| Thursday, August 29		| Fill out survey 			|
+| Tuesday, September 3 		| Bash/Unix/Git Online Tutorial 	| 
+| Wednesday, September 4	| Submit proof of installation 		| 
+| Sunday, September 8		| R datacamp tutorial(s)		| 
+| Sunday, September 15		| Tidyverse R datacamp tutorial(s)	| 
+| Sunday, September 17		| Python datacamp tutorial(s)		| 
+| Sunday, September 22		| Python datacamp tutorial(s)		| 
+| Sunday, September 29		| Database exploration 			|
+| Sunday, October 6		| Final project proposal		|
+| Sunday, October 13		| API/Webscraping project		|
+| Sunday, October 20		| Data cleaning project			|
+| Sunday, October 27		| Data visualization project		|
+| Sunday, November 3		| Final project update			|
+| November 25-December 4	| Final project presentations		| 
+| Wednesday, December 11	| Final projects due 			| 
 
 Assignment details can be found on bcourses. Unless otherwise specified, assignments should be turned in as **pdf documents** via the bCourses site. 
 
