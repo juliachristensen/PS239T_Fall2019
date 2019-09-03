@@ -1,6 +1,4 @@
 
-[![learning is tough](https://i.imgur.com/KlbogCv.png)](https://youtu.be/ycjhqN4LTq4?t=36s)
-
 # The Unix Shell: 1. Operating Systems and Unix
 
 > ### Learning objectives
@@ -18,7 +16,11 @@ An operating system is a suite of programs which make the computer work. It is a
 
 ### Unix
 
-UNIX is an operating system which was first developed in the 1960s, and has been under constant development ever since. 
+UNIX is an operating system which was first developed by AT & T employees at Bell Labs (1969-1971).  Bell Labs canceled the project (MULTICS) but was continued by the employees worked in a smaller scale. The new project was named UNICS (Uniplexed Information and Computation System) and then renamed UNIX. Due to [the anti-trust issue](https://en.wikipedia.org/wiki/Breakup_of_the_Bell_System), AT & T gave away UNIX in 1975. Berkeley is one of the main places where UNIX was developed. [The Berkeley Software Distribution](https://en.wikipedia.org/wiki/Berkeley_Software_Distribution), one of the branches of UNIX, came out it 1977.
+
+From Mac OS X to Linux, many of current operation systems are some versions of UNIX. 
+
+For more information on the history of UNIX, see [this link](https://docs.google.com/presentation/d/1kKt9V6rom55hU6SJ2_3nGluobjtScptlnJV9YFe6Jz4/pub?start=false&loop=false&delayms=3000&slide=id.g163c5ae2ce_0_17).
 
 ![Unix history](https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Unix_history-simple.svg/1200px-Unix_history-simple.svg.png)
 
@@ -33,13 +35,11 @@ Unix has several fundamental differences compared with Windows:
 
 ### Unix v. Apple OSX
 
-OSX *is* Unix: A version called Darwin, based on [BSD](https://en.wikipedia.org/wiki/Berkeley_Software_Distribution). It comes packaged with all the necessary tools:
+OSX *is* Unix: A version called Darwin, based on the Berkeley Software Distribution. It comes packaged with all the necessary tools:
 * The full suite of command-line tools in the **Terminal**
 * An X11() server for graphics (in the XQuartz package)
 * Secure shell and secure copy for working over networks 
 * The C and FORTRAN compilers (in the Xcode toolset)
-
-OSX is probably the best-designed commercial Unix variant for consumer use in operation today.
 
 ### Unix v. Linux
 
@@ -53,7 +53,7 @@ Unix has three main components
 
 #### Kernel
 
-The kernel of UNIX is the hub of the operating system: it allocates time and memory to programs and handles the filestore and communications in response to system calls. 
+The kernel of UNIX is the hub of the operating system: it allocates time and memory to programs and handles the [filestore](http://users.ox.ac.uk/~martinw/unix/chap3.html) (e.g., files and directories) and communications in response to system calls. 
 
 #### Shell
 
@@ -77,7 +77,6 @@ The standard file system has, among others, the following directories:
 | /lib  | Contains shared libraries needed to boot the system and run the commands in the root file system |
 | /tmp  | Local scratch space for storing temporary files, which may be deleted without notice |
 | /usr/bin | The primary directory for most executables used by normal users on the system (e.g., emacs, make, scp, sftp, ssh, and yum) |
-| usr/lib |Contains static and dynamic libraries, a few executables that usually are not invoked directly, and subdirectories for complex programs |
+| usr/lib |Contains static and dynamic libraries, a few executables that usually are not invoked directly, and subdirectories for complex program |
 
-We'll also be talking more about files + directories.
 
