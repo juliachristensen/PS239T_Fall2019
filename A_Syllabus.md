@@ -148,7 +148,7 @@ Both Monday and Wednesday classes will be required. Instead of separate lectures
 | Monday, November 11		| No class			| n/a		|
 | Wednesday, November 13	| Text analysis			| TBD		|
 | Monday, November 18		| Machine Learning		| TBD		|
-| Wednesday, November 20	| Machine Learning		| TBD		|
+| Wednesday, November 20	| Machine Learning		| Chris Kennedy |
 | Monday, November 25		| Presentations			| n/a		|
 | Wednesday, November 27	| No class			| n/a		|
 | Monday, December 2		| Presentations			| n/a		|
