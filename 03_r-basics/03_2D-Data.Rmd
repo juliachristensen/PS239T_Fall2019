@@ -1,10 +1,10 @@
 ---
 title: "Two-Dimensional Data in R"
 author: "PS239T"
-date: "Spring 2018"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 #### Outline
@@ -101,7 +101,7 @@ df <- data.frame(
   y = c("a", "b", "c"),
   stringsAsFactors = FALSE)
 str(df)
-df
+
 ```
 
 In reality, we rarely type up our datasets ourselves, and certainly not in R. The most common way to make a data.frame is by calling a file using `read.csv` (which relies on the `foreign` package), `read.dta` (if you're using a Stata file), or some other kind of data file input.
@@ -121,6 +121,11 @@ str(df)
 
 This means that a dataframe has `names()`, `colnames()`, and `rownames()`, although `names()` and `colnames()` are the same thing. 
 
+** Summary **
+
+- Set column names: names() in data frame, colnames() in matrix 
+- Set row names: row.names() in data frame, rownames() in matrix
+
 ```{r}
 vec1 <- 1:3
 vec2 <- c("a", "b", "c")
@@ -133,10 +138,14 @@ colnames(df)
 # change the colnames
 colnames(df) <- c("Number", "Character")
 df
+```
 
+```{r}
 names(df) <- c("Number", "Character")
 df
+```
 
+```{r}
 # change the rownames
 rownames(df) 
 rownames(df) <- c("donut", "pickle", "pretzel")
@@ -152,6 +161,7 @@ df <- data.frame(vec1, vec2)
 
 # these two are equivalent - number of columns
 length(df)
+
 ncol(df)
 
 # get number of rows
@@ -201,6 +211,7 @@ It's a common mistake to try and create a dataframe by `cbind()`ing vectors toge
 bad <- (cbind(x = 1:2, y = c("a", "b")))
 bad
 str(bad)
+
 good <- data.frame(x = 1:2, y = c("a", "b"),
   stringsAsFactors = FALSE)
 good

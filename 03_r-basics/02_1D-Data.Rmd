@@ -1,9 +1,13 @@
 ---
 title: "One-Dimensional Data in R"
 author: "PS239T"
-date: "Spring 2018"
-output: html_document
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  pdf_document: default
+  html_document: default
 ---
+
+* For factor subsection, I referred to [Factors in R](https://www.stat.berkeley.edu/~s133/factors.html) by Phil Spector.
 
 # Intro to Data Structures
 
@@ -15,14 +19,14 @@ It is **critical** to understand because these are the objects you will manipula
   - Everything that exists is an object.
   - Everything that happens is a function call.
   
-> __John Chambers__
+> __John Chambers__the creator of S (the mother of R)
 
 #### Outline
 
 In this markdown file, we cover the types of one-dimensional objects (vectors) that exist in R and their attributes.  
 
-1. [Main Classes](#main-classes) introduces you to R's one-dimensional atomic classes and data structures (vectors, lists, and a brief preview of how the two-dimensional structures are different).
-2. [Attributes](#attributes) takes a small detour to discuss attributes, R's flexible metadata specification. Here you'll learn about factors, an important data structure created by setting attributes of an atomic vector.
+1. [Main Classes](#main-classes) introduces you to R's one-dimensional or atomic classes and data structures. R has five basic atomic classes: logical, integer, numeric, complex, character. Social scientists don't use complex class. (Also, remember that we rarely use trigonometry.)
+2. [Attributes](#attributes) takes a small detour to discuss attributes, R's flexible metadata specification. Here you'll learn about factors, an important data structure created by setting attributes of an atomic vector. R has many data structures: vector, list, matrix, data frame, factors, tables.
 
 # 1. Main Classes of Vectors {#main-classes}
 
@@ -42,16 +46,21 @@ In this markdown file, we cover the types of one-dimensional objects (vectors) t
 | 2 (Must add a `L` at end to denote integer) | integer |
 | `TRUE`, `FALSE` | logical |
 
-Like Python, R is dynamically typed. There are a few differences in terminology, however, that are pertinent. First, "types" in Python are referred to as "classes" in R.  Second, R has some different names for the types string, integer, and float --- specifically **character**, **integer** (not different), and **numeric**. Because there is no "float" class in R, users tend to default to the "numeric" class when they want to work with numerical data.
+Like Python, R is dynamically typed. There are a few differences in terminology, however, that are pertinent. 
 
-The function for recovering object classes is ```class()```.
+- First, "types" in Python are referred to as "classes" in R. 
+
+- Second, R has some different names for the types string, integer, and float --- specifically **character**, **integer** (not different), and **numeric**. Because there is no "float" class in R, users tend to default to the "numeric" class when they want to work with numerical data.
+
+The function for recovering object classes is ```class()```. L suffix to qualify any number with the intent of making it an explicit integer. See more from the [R language definition](https://cran.r-project.org/doc/manuals/R-lang.html).
 
 ```{r}
 class(3)
-class(3L)
+class(3L) 
 class("Three")
-class(T)
+class(F)
 ```
+
 
 ### 1b. Data Structures
 
@@ -106,12 +115,22 @@ length(x)
 
 ```{r, eval = TRUE}
 y <- c(TRUE, TRUE, FALSE, FALSE)
+
+y
 ```
 
 Finally you can have character vectors:
 
 ```{r, eval = TRUE}
-z <- c("Beyonce", "Kelly", "Michelle", "LeToya")
+kim_family <- c("Jae", "Sun", "Jane")
+
+is.integer(kim_family) # integer?
+
+is.character(kim_family) # character?
+
+is.atomic(kim_family) # atomic?
+
+typeof(kim_family) # what's the type?
 ```
 
 **Short exercise: Create and examine your vector**  
@@ -122,12 +141,13 @@ Create a character vector called `fruit` that contain 4 of your favorite fruits.
 
 # First create your fruit vector 
 # YOUR CODE HERE
-
+fruit <- 
 
 # Examine your vector
 length(fruit)
 class(fruit)
 str(fruit)
+
 ```
 
 **Add elements**
@@ -153,7 +173,10 @@ You can also create vectors as a sequence of numbers
 
 ```{r, eval = TRUE}
 series <- 1:10
+series
+
 seq(10)
+
 seq(1, 10, by = 0.1)
 ```
 
@@ -254,7 +277,7 @@ as.logical(x)
 
 ### 1e. Lists
 
-Lists are different from atomic vectors because their elements can be of any type. You construct lists by using `list()` instead of `c()`: 
+Lists are also vectors, but different from atomic vectors because their elements can be of any type. In short, they are generic vectors. You construct lists by using `list()` instead of `c()`: 
 
 Lists are sometimes called recursive vectors, because a list can contain other lists. This makes them fundamentally different from atomic vectors. 
 
@@ -272,7 +295,7 @@ is.list(x)
 length(x)
 ```
 
-`c()` will combine several lists into one. If given a combination of atomic vectors and lists, `c()` will coerce the vectors to lists before combining them. Compare the results of `list()` and `c()`:
+`c()` will combine several lists into one. If given a combination of atomic vectors and lists, `c()` (con**c**atenate) will coerce the vectors to lists before combining them. Compare the results of `list()` and `c()`:
 
 ```{r}
 x <- list(list(1, 2), c(3, 4))
@@ -293,7 +316,9 @@ Lists are used to build up many of the more complicated data structures in R. Fo
 
 ```{r}
 is.list(mtcars)
+
 mod <- lm(mpg ~ wt, data = mtcars)
+
 is.list(mod)
 ```
 
@@ -331,8 +356,11 @@ Attributes provide additional information about the data to you, the user, and t
 * Dimensions, used to turn vectors into matrices.
 
 * Class, used to implement the S3 object system.
- 
+
 Each of these attributes has a specific accessor function to get and set values. When working with these attributes, use `names(x)`, `dim(x)`, and `class(x)`
+
+**Tips**
+In an object-oriented system, a [class](https://www.google.com/search?q=what+is+class+programming&oq=what+is+class+programming&aqs=chrome.0.0l6.3543j0j4&sourceid=chrome&ie=UTF-8) (an extensible problem-code-template) defines a type of objects like what its properties are, how it behaves, and how it relates to other types of objects. Therefore, technically, an object is an [instance](https://en.wikipedia.org/wiki/Instance_(computer_science)) (or ocurrence) of a class. A method is a function associated with a particular type of object.
 
 ### 2a. Names
 
@@ -346,9 +374,12 @@ You can also modifying an existing vector:
 
 ```{r}
 x <- 1:3
+
 names(x)
-names(x) <- c("a", "b", "c")
-x
+
+names(x) <- c("e", "f", "g")
+
+names(x)
 ```
 
 Names don't have to be unique. However, character subsetting, described in the next lesson, is the most important reason to use names and it is most useful when the names are unique. (For Python users: when names are unique, a vector behaves kind of like a Python dictionary key.)
@@ -367,12 +398,19 @@ You can create a new vector without names using `unname(x)`, or remove names in 
 
 ### 2b. Factors
 
-Factors are special vectors that represent categorical data. Factors can be ordered or unordered and are important for modelling functions such as `lm()` and `glm()` and also in plot methods.
+Factors are special vectors that represent categorical data. Factors can be ordered (ordinal variable) or unordered (nominal or categorical vavariable) and are important for modelling functions such as `lm()` and `glm()` and also in plot methods.
 
-Factors can only contain pre-defined values. Set allowed values using the `levels()` attribute.
+**Quiz**
+1. If you want to enter dummy variables (Democrats = 1, Non-democrats = 0) in your regression model, should you use numeric or factor variable?
+
+Factors can only contain pre-defined values. Set allowed values using the `levels()` attribute. Note that a factor's levels will always be character values. 
+
 
 ```{r}
+x <- c("a", "b", "b", "a")
+
 x <- factor(c("a", "b", "b", "a"))
+x
 x
 class(x)
 levels(x)
@@ -382,6 +420,9 @@ x[2] <- "c"
 
 # NB: you can't combine factors
 c(factor("a"), factor("b"))
+
+rep(1:5, rep(6,5))
+
 ```
 
 Factors are pretty much integers that have labels on them. Underneath, it's really numbers (1, 2, 3...). 
@@ -398,11 +439,12 @@ Factors are useful when you know the possible values a variable may take, even i
 ```{r}
 party_char <- c("democrat", "democrat", "democrat")
 party_char 
+
 party_factor <- factor(party_char, levels = c("democrat", "republican"))
 party_factor
 
-table(party_char)
-table(party_factor)
+table(party_char) # shows only democrats 
+table(party_factor) # shows republicans too 
 ```
 
 Sometimes factors can be left unordered. Example: `democrat`, `republican`.
@@ -412,10 +454,12 @@ Other times you might want factors to be ordered (or ranked). Example: `low`, `m
 ```{r}
 x <- factor(c("low","medium","high"))
 str(x)
+
 is.ordered(x)
 
-x <- ordered(c("low","medium","high"), levels = c("high","medium","low"))
-is.ordered(x)
+y <- ordered(c("low","medium","high"), levels = c("high","medium","low"))
+is.ordered(y) 
+
 ```
 
 While factors look (and often behave) like character vectors, they are actually integers. Be careful when treating them like strings. Some string methods (like `gsub()` and `grepl()`) will coerce factors to strings, while others (like `nchar()`) will throw an error, and still others (like `c()`) will use the underlying integer values. 
@@ -433,6 +477,7 @@ For this reason, it's usually best to explicitly convert factors to character ve
 
 Unfortunately, most data loading functions in R automatically convert character vectors to factors. This is suboptimal, because there's no way for those functions to know the set of all possible levels or their optimal order. If this becomes a problem, use the argument `stringsAsFactors = FALSE` to suppress this behaviour, and then manually convert character vectors to factors using your knowledge of the data.
 
+
 **More attributes**
 
 All R objects can have arbitrary additional attributes, used to store metadata about the object. Attributes can be thought of as a named list (with unique names). Attributes can be accessed individually with `attr()` or all at once (as a list) with `attributes()`. 
@@ -441,7 +486,8 @@ All R objects can have arbitrary additional attributes, used to store metadata a
 y <- 1:10
 attr(y, "my_attribute") <- "This is a vector"
 attr(y, "my_attribute")
-str(attributes(y))
+
+str(attributes(y)) # str returns a new object with modified information
 ```
 
 ### Exercises
