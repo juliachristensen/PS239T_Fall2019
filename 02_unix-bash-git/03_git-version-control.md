@@ -127,7 +127,6 @@ Here is an example file structure based on a great [article](http://www.rebeccab
 - name_of_project.Rproj (for R)
 - README.md (for Git) 
 
-The above example incorporates ideas from ![this article](https://datacarpentry.org/R-ecology-lesson/img/working-directory-structure.png) as well. 
 
 ******************************************
 
