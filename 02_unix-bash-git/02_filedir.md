@@ -272,7 +272,7 @@ In order to do in-class exercises, we first need to download a copy of the cours
 
 #### Challenge 1
 
-1. `cd` into the `PS239T_Fall2019/02_Unix-Bash` sub-directory.
+1. `cd` into the `PS239T_Fall2019/02_unix-bash-git` sub-directory.
 2. list the files in the directory
 
 #### Challenge 2
