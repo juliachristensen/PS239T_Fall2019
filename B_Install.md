@@ -50,12 +50,16 @@ We will teach Python using the jupyter notebook, a programming environment that 
 
 #### Windows
 
-* Download and install [Anaconda](https://store.continuum.io/cshop/anaconda/).
-* Download the default Python 3 installer (do not follow the link to version 2). Use all of the defaults for installation except make sure to check **Make Anaconda the default Python.**
+* Download and install [Anaconda](https://www.anaconda.com/distribution/).
+* Select Windows operating system. 
+* Click the link for the most recent Python 3 version and the Graphical Installer. Run the installer. 
+* Use all of the defaults for installation except make sure to check **Make Anaconda the default Python.**
 
 #### Mac OS X
 
-* Download and install [Anaconda](https://store.continuum.io/cshop/anaconda/).
+* Download and install [Anaconda](https://www.anaconda.com/distribution/#macos).
+* Select Mac operating system. 
+* Click the link for the most recent Python 3 version and the Graphical Installer. Run the installer. 
 * Download the default Python 3 installer (do not follow the link to version 2). Use all of the defaults for installation.
 
 #### Linux
