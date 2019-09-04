@@ -150,7 +150,7 @@ $ git config --global user.email username@company.extension
 #### Challenge 1: Update course files
 
 1. Change your working directory to the cloned subfolder called `PS239T_Fall2019` using `cd`.
-3. Type `git clone https://github.com/juliachristensen/PS239T_Fall2019` and hit enter. 
+3. Type `git fetch origin` and hit enter. 
 4. Wait until a copy of the files from the class GitHub page are copied to your computer. 
 
 #### (Optional) Challenge 2: Create GitHub Account
