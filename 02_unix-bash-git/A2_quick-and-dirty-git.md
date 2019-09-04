@@ -11,14 +11,14 @@ title: Quick 'n' Dirty Git
 
 Thus far, we've been using git to sync up our PS239T Repo:
 
-![xkcd](xkcd.png)
+![xkcd](img/xkcd.png)
 
 But git can do a lot more.
 
 We'll start by exploring how version control can be used to keep track of what one person did and when. Even if you aren't collaborating with other people,
 version control is much better for this than this:
 
-![phdcomic](phd-git.gif)
+![phdcomic](img/phd-git.gif)
 
 Git is powerful and complicated. We can do a full day workshop on git alone. But it is also quite possible to harness it's powers by cycing through three commands: `add`, `commit`, `push`. So even if you don't understand what's going on underneath the hood, knowing just these three commands can get you very far. 
 
