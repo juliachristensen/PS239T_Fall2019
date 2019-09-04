@@ -8,6 +8,7 @@
 > * Explain how shell programs are used to interact with computers using a command line. 
 > * Explain why Unix shells like Bash are pre-installed on Mac but not Windows computers. 
 > * Discuss how using Unix shell is different on Mac and Windows OS. 
+> * Practice first commands. 
 
 
 ## 1. What is an Operating System? 

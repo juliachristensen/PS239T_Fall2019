@@ -10,6 +10,13 @@
 > *   Identify the actual command, flags, and filenames in a command-line call.
 > *   Demonstrate the use of tab completion, and explain its advantages.
 
+### 0.  
+
+The part of the operating system responsible for managing files and directories is called the **file system**. It organizes our data into files, which hold information, and directories (also called "folders"), which hold files or other directories.
+
+Several commands are frequently used to create, inspect, rename, and delete files and directories. 
+
+
 
 ### 1. File System Organization
 
@@ -256,11 +263,16 @@ This is called **tab completion**, and we will see it in many other tools as we 
 
 ## Exercises
 
+In order to do in-class exercises, we first need to download a copy of the course materials. We will be discussing git in more detail later. For now, follow these instructions: 
+
+1. Decide where you want to keep files for this class on your computer. 
+2. Change your working directory to this subfolder using `cd`. This is where you will keep a copy of the the `PS239T` materials. 
+3. Type `git clone https://github.com/juliachristensen/PS239T_Fall2019` and hit enter. 
+4. Wait until a copy of the files from the class GitHub page are copied to your computer. 
+
 #### Challenge 1
 
-1. Change your working directory to the place where you want to clone the `PS239T` materials. 
-2. type `git clone https://github.com/jaeyk/PS239T` 
-3. `cd` into the `PS239T/02_Unix-Bash` sub-directory.
+1. `cd` into the `PS239T_Fall2019/02_Unix-Bash` sub-directory.
 2. list the files in the directory
 
 #### Challenge 2
@@ -275,3 +287,7 @@ What does the command `cd` without a directory name do?
 #### Challenge 3
 
 What does the command `ls` do when used with the -s arguments?
+
+#### (Optional) Challenge 4
+
+If you plan on using data from many smaller files (i.e. newspaper articles or photos) or big datasets, go through the rest of the files in this folder (numbered 04 through 07). Unless you are planning to use the shell right away, you don't have to do every exercise. Instead, get a sense for how the shell might be useful to you and what material to review when you are ready to use the shell to solve your data problem. 
