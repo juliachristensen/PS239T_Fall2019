@@ -1,4 +1,4 @@
-# The Unix Shell: 5. Git basics 
+# The Unix Shell: Git basics 
 
 > ### Learning objectives
 > 

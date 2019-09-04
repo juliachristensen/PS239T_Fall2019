@@ -1,5 +1,5 @@
 
-# The Unix Shell: 3. Files and Directories
+# The Unix Shell: Files and Directories
 
 > ### Learning Objectives
 >
@@ -10,7 +10,7 @@
 > *   Identify the actual command, flags, and filenames in a command-line call.
 > *   Demonstrate the use of tab completion, and explain its advantages.
 
-### 0.  
+### 0. File Systems
 
 The part of the operating system responsible for managing files and directories is called the **file system**. It organizes our data into files, which hold information, and directories (also called "folders"), which hold files or other directories.
 
