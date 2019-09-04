@@ -19,74 +19,46 @@ An operating system (OS) is a suite of programs which make the computer work. It
 
 We navigate our operating systems and tell our computers to do things using human-computer interfaces. 
 
-### Two common human-computer interfaces
-
-#### GUI 
-
 Most people interact with their computers using **Graphical User Interfaces (GUIs)**. A GUI (pronounced gooey) is a way of interacting with your computer through graphical icons and visual indicators, typically using a mouse. 
 
-#### Command Line (CLI)
+In this class, we will learn an older form of interacting with computers called **Command-line Interface (CLI)**. Unlike GUIs, CLI methods involve interacting with your computer through typing commands and do not rely on mouse input. 
 
-**Command-line Interface (CLI)** is a method of interacting with your computer through typing commands. CLI only uses keyboard input (and not mouse input). 
+The heart of CLI is a concept called the 'read-evaluate-print loop' (or REPL). Simply put, when the user types a command and then presses the enter (or return) key, the computer reads it, executes it, and prints its output. The user then types another command, and so on until the user logs off.
 
-You may hear the term 'read-evaluate-print loop' (or REPL) used to describe command-line interface. The 'read-evaluate-print loop' is a simple concept at the heart of CLI. Simply put, when the user types a command and then presses the enter (or return) key, the computer reads it, executes it, and prints its output. The user then types another command, and so on until the user logs off.
+## 3. Why Use Command-line Interface
 
-### Why use a command-line interface?
-
-William Shotts the author of *[The Linux Command Line](http://linuxcommand.org/tlcl.php)* summarized the promise and challenges of CLI when he stated,  
-> graphical user interfaces make easy tasks easy, while command line interfaces make difficult tasks possible.
-
-Practically, you should learn it because... 
-
-1. You will be using it at the beginning of every class.
-	* You will use two(ish) commands in the shell before every class to copy an updated version of the course materials onto your computer. 
-	* You will be expected to follow along and do in-class exercises using the files on GitHub. 
-	* The material for this class is not fixed. It will be updated periodically. 
-
-2. For certain tasks, it can make your life a lot easier. 
-	* Manipulating large data files 
-	* Renaming and reorganizing files 
-	* Moving and running files on an external server 
-
-
-## 3. Where is this command line? 
-
-We use shell programs to interact with our computers using a command line. 
-
-Although there are many shell programs available, we will be focusing on Bash. 
-
-
-## 4. What is a (command line) shell? 
-
-A shell is an old-school way of interacting with your computer (but also new-school because serious programmers use it all the time). 
-
-Because this class focuses on applying computer skills rather than underlying theory, I won't be giving you a detailed description of how a shell works. 
-
-### A note about vocabulary... 
-
-In addition to shell and command line, you may also hear the term 'terminal' used to describe using a command line to interact with your computer. 
-
-### Why learn to use a shell? 
-
-1. You will be using it at the beginning of every class.
-
+First, you will be using it at the beginning of every class.
 * You will use two(ish) commands in the shell before every class to copy an updated version of the course materials onto your computer. 
 * You will be expected to follow along and do in-class exercises using the files on GitHub. 
 * The material for this class is not fixed. It will be updated periodically. 
 
-2. For certain tasks, it can make your life a lot easier. 
-
-* Manipulating large data files 
+Second, for certain tasks, it can make your life a lot easier. Examples include: 
+* Resolving 'big data' challenges
+	* Much faster to manipulate large text files (i.e. filter or split up csv files). 
+	* Often the easiest way to interact with remote machines, including most cluster and cloud computing platforms. 
 * Renaming and reorganizing files 
-* Moving and running files on an external server 
+	* Especially important for projects that involve combining data from many different photo or text files. 
+* Interfacing with GitHub 
+
+William Shotts the author of *[The Linux Command Line](http://linuxcommand.org/tlcl.php)* summarized the promise and challenges of CLI when he stated,  
+> graphical user interfaces make easy tasks easy, while command line interfaces make difficult tasks possible.
 
 
-## Bash 
+## 4. How to Use Command-line Interface
 
-Bash is the most common Unix shells. Like R, 'Bash' is a program as well as a language. In other words, we run bash commands using the bash program. 
+To use CLI, we use **(command line) shell** programs. The shell reads commands that you type into it, figures out what commands to run, and orders the computer to execute them. In other words, the shell works as an intermediary between the user and computer and facilitates the 'read-evaluate-print loop'. 
+
+A brief aside reguarding vocabulary... 
+* Its intermediary role is why the shell is called the shell -- it encloses the operating system in order to hide some of its complexity and make it simpler to interact with.
+* In addition to shell and command line, you may also hear the term 'terminal' used to describe interacting with a computer through a command line. 
+
+## 5. Bash 
+
+Although there are many shell programs available, we will be focusing on **Bash**, which is the most common *Unix* shells. 
 
 Bash stands for the Bourne Again Shell (so-called because it's derived from a shell written by Stephen Bourne --- this is what passes for wit among programmers). Bash is the default shell on most modern implementations of Unix, and in most packages that provide Unix-like tools for Windows.
 
+Note that you may hear people refer to 'bash' as both a program and a language. This is because, like R, there is a program-specific language that has been developed for Bash. In other words, we can run bash commands using the bash program. 
 
 ### Why did we download a bash shell on Windows but not Mac computers? 
 
@@ -95,7 +67,7 @@ In this course, we will be using a Unix shell. Unix and Unix-like operating syst
 Windows was designed seperately from Unix. Thus, it does not have Bash built-in. This is one of many differences between Windows and Unix. 
 
 
-## Unix vs. Windows 
+## 6. Unix vs. Windows 
 
 Unix has several fundamental differences compared with Windows:
 
@@ -106,11 +78,65 @@ Unix has several fundamental differences compared with Windows:
 
 For our purposes, most differences between Unix and Windows aren't relevant. 
 
-One exception are the file structures. Practically, Windows users will need to change "\" to "/". 
+One exception are the file structures. More information about Unix and the file structure can be found below. 
+
+Practically, Windows users will need to change "\" to "/". 
 * The Windows File Explorer seperates subdirectories and files using backslashes ("\"). 
 * When you write file paths in the bash shell, use a frontslash ("/") to seperate subdirectories and files.  
 
-See below for more information about Unix and the file structure. 
+
+## 7. Our First Commands
+
+Getting used to a shell can be intimidating at first! Let's start by opening a new shell window and trying out a few basic commands. 
+
+First, open a shell window:
+
+```shell
+$
+```
+
+The dollar sign is a **prompt**, which shows us that the shell is waiting for input; your shell may show something more elaborate.
+
+### whoami
+
+Now, type the command `whoami`, then press the Enter key (sometimes marked Return) to send the command to the shell.
+
+The command's output is the ID of the current user, i.e., it shows us who the shell thinks we are:
+
+```shell
+$ whoami
+
+oski
+```
+
+More specifically, when we type `whoami` the shell:
+
+1.  finds a program called `whoami`,
+2.  runs that program,
+3.  displays that program's output, then
+4.  displays a new prompt to tell us that it's ready for more commands.
+
+### ping 
+
+While `whoami` and other commands from today's lesson focus on the structure of our own operating systems, our operating systems rarely work in isolation. Often, we are relying on the Internet to communicate with others! You can visualize this sort of communication within your own shell by asking your computer to `ping` (based on the old term for submarine sonar) an IP address provided by Google (8.8.8.8); in effect, this will test whether your Internet (thanks Airbears2) is working. 
+
+Type the following and hit enter: 
+
+```shell
+$ ping 8.8.8.8
+```
+
+> Note: Windows users may have to try a slightly different alternative:
+> 
+> ```shell
+> $ ping -t 8.8.8.8
+> ```
+
+Your computer will begin continuously pinging this IP address and reporting back the "latency," or how long it took for the ping data packet to go to that IP address and back. If your Internet isn't working, it will instead report an error saying "No route to host." 
+
+Ping runs continuously, so when we want it to stop, we have to manually tell the kernel to stop executing the ping command. We do this simply by typing ctrl+c. 
+
+(Thanks [Paul Thissen](http://www.paulthissen.org/) for the suggestion!)
 
 
 ******************************************
