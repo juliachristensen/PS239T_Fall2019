@@ -23,6 +23,10 @@ For more information on the varieties of version control systems, please read [P
 
 Git is a very powerful and widely used tool for collaborating and tracking changes to a project. Compared to other version-control systems, it has many valuable features for large-scale collaboration. If you are interested, read through [Github's Git Handbook](https://guides.github.com/introduction/git-handbook/). 
 
+Git tracks changes to **repositories**. 
+> A repository is the most basic element of GitHub. They're easiest to imagine as a project's folder. A repository contains all of the project files (including documentation), and stores each file's revision history. Repositories can have multiple collaborators and can be either public or private. 
+> -Source: [GitHub glossary](https://help.github.com/en/articles/github-glossary)
+
 ## 3. GitHub
 
 GitHub is a private company that hosts Git repositories. Repositories hosted by GitHub can be viewed on GitHub.com. In other words, GitHub uses Git as part of a service that it provides, but using Git does not require using GitHub. 
@@ -76,7 +80,14 @@ $ git commit -m "your comment" # your comment for the commit.
 $ git push origin master # commit the change. Origin is a defaul name given to a server by Git. 
 ```
 
-## 6. Directory Organization
+## 6. gitignore files 
+
+Files that are listed in a gitignore file are ignored by Git. Sometimes we don't want a file available on GitHub (i.e. files with private information like passwords) but we can't or don't want to delete the file from the directory. If we add these files to the gitignore document, any changes will not be synced with your GitHub repo. 
+
+
+If you don't want a file to be 
+
+## 7. Directory Organization
 
 Although we will be covering organization in more detail later this semester, starting to think through directory organization will be useful to you right away. Having well-organized files is a key part of managing projects and version control. 
 
