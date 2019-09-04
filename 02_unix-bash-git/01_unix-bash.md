@@ -139,6 +139,21 @@ Ping runs continuously, so when we want it to stop, we have to manually tell the
 
 (Thanks [Paul Thissen](http://www.paulthissen.org/) for the suggestion!)
 
+## 8. Warning
+
+Usually, there are limited consequences for experimenting with the tools that we will cover in this class. The Bash Shell is an exception. You can mess up your computer if you aren't careful. 
+
+In particular, be very careful when using the `rm()` command. This command removes files ("rm" is short for "remove"). 
+
+> #### Deleting Is Forever
+> 
+> Unix doesn't have a trash bin: when we delete files, they are unhooked
+> from the file system so that their storage space on disk can be
+> recycled. Tools for finding and recovering deleted files do exist, but
+> there's no guarantee they'll work in any particular situation, since the
+> computer may recycle the file's disk space right away.
+
+
 
 ******************************************
 
