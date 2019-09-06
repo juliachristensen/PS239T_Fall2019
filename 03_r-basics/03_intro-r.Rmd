@@ -9,12 +9,7 @@ output:
     toc_float: true
     df_print: paged
     theme: flatly
-    highlight: pygments  
-knit: (function(input_file, encoding) {
-  out_dir <- '../docs/_site';
-  rmarkdown::render(input_file,
- encoding=encoding,
- output_file=file.path(dirname(input_file), out_dir, 'index.html'))})    
+    highlight: pygments
 ---
 
 ```{r setup, include=FALSE}
@@ -97,9 +92,31 @@ Python users may get confused because indexing starts at 1 instead of 0.
 
 ### 1.8. Piping 
 
-Piping exists in many languages (i.e. Unix). In R, pipes use the syntax `%>%`. Pipes are not included in base R, but they are included as part of many packages, including `tidyverse`. 
+Piping exists in many languages. In R, pipes use the syntax `%>%`. Pipes are not included in base R, but they are included as part of many packages, including `tidyverse`. 
 
-Simple example:
+[The following example](https://r4ds.had.co.nz/pipes.html) by Wickham is a pseudo code. So consider that only as a thought experiment. 
+
+Pipe takes return value and feeds it in as an input to another function. In UNIX, pipe operator is `|`. 
+
+```{r, eval = FALSE}
+x %>% f %>% g # equals g(f(x))
+```
+
+```{r, eval = FALSE}
+# Without piping
+foo_foo_1 <- hop(foo_foo, through = forest)
+foo_foo_2 <- scoop(foo_foo_1, up = field_mice)
+foo_foo_3 <- bop(foo_foo_2, on = head)
+
+# With timping 
+foo_foo %>%
+  hop(through = forest) %>%
+  scoop(up = field_mice) %>%
+  bop(on = head)
+```
+Now, let's work with the real data.
+
+Example with real data:
 ```{r}
 # Install pipes package
 # install.packages("magrittr") #rmarkdown fails if uncommented

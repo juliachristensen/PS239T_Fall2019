@@ -8,8 +8,8 @@ output:
     toc_depth: 4
     toc_float: true
     df_print: paged
-    theme: united
-    highlight: tango
+    theme: flatly
+    highlight: pygments
 ---
 
 # 2D Data Structures in R

@@ -1,5 +1,15 @@
 ---
-title: "RStudio"
+title: "RStudio and R Markdown"
+author: "PS239T"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    df_print: paged
+    theme: flatly
+    highlight: pygments
 ---
 
 ```{r setup, include=FALSE}
@@ -7,7 +17,7 @@ title: "RStudio"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# RStudio and RMarkdown 
+# RStudio and R Markdown 
 
 ## 1. RStudio 
 

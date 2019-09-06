@@ -3,9 +3,27 @@ title: "Subsetting"
 author: "PS239T"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  pdf_document: default
-  html_document: default
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    df_print: paged
+    theme: flatly
+    highlight: pygments
 ---
+
+```{r setup, include=FALSE}
+# Document set up
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load useful packages
+pacman::p_load(
+  tidyverse, #downloads all tidyverse packages
+  data.table, #big datasets 
+  magrittr #better piping 
+)
+```
+
 
 # Subsetting
 
@@ -19,7 +37,7 @@ When working with data, you'll need to subset objects early and often. Luckily, 
 
 This unit helps you master subsetting by starting with the simplest type of subsetting: subsetting an atomic vector with `[`. It then gradually extends your knowledge, first to more complicated data types (like dataframes and lists), and then to the other subsetting operators, `[[` and `$`. You'll then learn how subsetting and assignment can be combined to modify parts of an object, and, finally, you'll see a large number of useful applications.
 
-### Outline
+**Outline**
 
 1. [Data types](#data-types) starts by teaching you about `[`. You'll start by learning the four ways to subset atomic vectors. You'll then learn how those four methods act when used to subset lists, matrices, and data frames.
 2. [Subsetting operators](#subsetting-operators) expands your knowledge of subsetting operators to include `[[` and `$`, focusing on the important principles of simplifying vs. preserving.
@@ -27,11 +45,14 @@ This unit helps you master subsetting by starting with the simplest type of subs
 4. [Applications](#applications) leads you through important, but not obvious, applications of subsetting to solve problems that you often encounter in a data analysis, using the tools above.
 5. [Bonus Items](#bonus-items) show you some additional details of how to work with your data and make your code more efficient, including by distinguishing when you want to simplify vs. preserve your data. 
 
-# 1. Data types {#data-types}
+> **Python Users!** Remember that in R, positions start at 1, unlike Python, which starts at 0. Fun!**
+
+
+**********************************************************
+
+## 1. Subsetting Automic data with '[' {#data-types}
 
 It's easiest to learn how subsetting works for atomic vectors, and then how it generalizes to higher dimensions and other more complicated objects. We'll start with `[`, the most commonly used operator. [Subsetting operators](#subsetting-operators) will cover `[[` and `$`, the two other main subsetting operators.
-
-### 1a. Atomic vectors
 
 Let's explore the different types of subsetting with a simple vector, `x`. 
 
@@ -41,11 +62,11 @@ x <- c(2.1, 4.2, 3.3, 5.4)
 
 Note that the number after the decimal point gives the original position in the vector.
 
-**NB:** In R, positions start at 1, unlike Python, which starts at 0. Fun!**
+### 1.1. Five methods of subsetting automic vector 
 
-There are five things that you can use to subset a vector: 
+#### a. Positive integers
 
-#### 1.   __Positive integers__ return elements at the specified positions:
+__Positive integers__ return elements at the specified positions:
 
 ```{r}
 x <- c(2.1, 4.2, 3.3, 5.4)
@@ -62,7 +83,9 @@ x[c(1, 3, 2, 4)]
 x[c(1, 1)]
 ```
 
-#### 2.   __Negative integers__ omit elements at the specified positions:
+#### b. Negative integers
+
+__Negative integers__ omit elements at the specified positions:
 
 ```{r}
 x <- c(2.1, 4.2, 3.3, 5.4)
@@ -70,14 +93,40 @@ x[-1]
 x[-c(3, 1)]
 ```
 
-You can't mix positive and negative integers in a single subset:
+Note: you can't mix positive and negative integers in a single subset:
 
 ```{r, error = TRUE}
 x <- c(2.1, 4.2, 3.3, 5.4)
 x[c(-1, 2)]
 ```
 
-#### 3.   __Logical vectors__ select elements where the corresponding logical value is `TRUE`.
+#### c. Character vectors
+
+__Character vectors__ to return elements with matching names. This only works if the vector is named.
+ 
+```{r}
+x <- c(2.1, 4.2, 3.3, 5.4)
+
+# apply names
+names(x) <- c("a", "b", "c", "d")
+x
+
+# subset using names
+x[c("d", "c", "a")]
+
+# Like integer indices, you can repeat indices
+x[c("a", "a", "a")]
+
+# Careful! names are always matched exactly
+x <- c(abc = 1, def = 2)
+x
+x[c("a", "d")]
+```
+
+
+#### 3. Logical vectors
+
+__Logical vectors__ keep elements where the corresponding logical value is `TRUE`.
 
 ```{r}
 x <- c(2.1, 4.2, 3.3, 5.4)
@@ -118,8 +167,26 @@ x[x < 3 | x > 5]
 x[!x > 5]
 ```
 
-Another way to generate implicit conditional statements is using the `%in%` operator, which works like the `in` keywords in Python.
+### 1.2. Useful Tricks for subsetting with [
 
+#### 1.2.1. Piping 
+
+Instead of writing out the original variable name multiple times, you can use the period symbol `.` and the piping operator `%>%` to subset. 
+```{r}
+x <- c(2.1, 4.2, 3.3, 5.4)
+
+# use a conditional statement to create an implicit logical vector
+x %>% .[. > 3]
+
+# combing two conditional statements with |
+x %>% .[. < 3 | . > 5]
+```
+
+#### 1.2.1. `%in%`, `%chin%`, `%between%`, and `%like%`.
+
+Note: To use these operators, you will need to load the package `data.table`.
+
+One way to generate implicit conditional statements is using the `%in%` operator, which works like the `in` keywords in Python.
 ```{r}
 # generate implicit logical vectors through the %in% operator
 x %in% c(3.3, 4.2)
@@ -127,28 +194,35 @@ x
 x[x %in% c(3.3, 4.2)]
 ```
 
-#### 4. __Character vectors__ to return elements with matching names. This only works if the vector is named.
- 
+For character vectors, `%chin%` is a faster version of `%in%`.
+
 ```{r}
-x <- c(2.1, 4.2, 3.3, 5.4)
+# Use built-in dataset
+data(state)
 
-# apply names
-names(x) <- c("a", "b", "c", "d")
-x
+# Duplicate vector to make bigger 
+state.abb %<>% rep(., 100)
 
-# subset using names
-x[c("d", "c", "a")]
+# Speed of %in%
+start.time <- Sys.time() #start clock
+state.abb %<>% .[. %in% c("OR","CA")] 
+(Sys.time() - start.time) %>% print() #time elapsed 
 
-# Like integer indices, you can repeat indices
-x[c("a", "a", "a")]
-
-# Careful! names are always matched exactly
-x <- c(abc = 1, def = 2)
-x
-x[c("a", "d")]
+# Speed of %chin%
+start.time <- Sys.time() #start clock
+state.abb %<>% .[. %chin% c("OR","CA")] 
+(Sys.time() - start.time) %>% print() #time elapsed 
 ```
 
-#### Exercise
+`%between%` finds numbers between two values. 
+```{r}
+x20 <- c(1:20)
+x20 %between% c(1,10)
+```
+
+`%like%` is a wrapper for `grepl`. We will revisit this when we cover regular expressions (regex). Documentation can be found [here](https://www.rdocumentation.org/packages/DescTools/versions/0.99.19/topics/%25like%25).
+
+### 1.3. Exercise
 
 Subset `country.vector` below to return every value EXCEPT "Canada" and "Brazil"
 
@@ -173,20 +247,10 @@ country.vector[!________ %in% c(________)]
 
 ```
 
-### 1b. Lists
 
-Subsetting a list works in the same way as subsetting an atomic vector. Using `[` will always return a list; `[[` and `$`, as described below, let you pull out the components of the list.
+**********************************************************
 
-```{r}
-l <- list('a' = 1, 'b' = 2)
-l
-  
-l[1]
-l[[1]]
-l['a']
-```
-
-### 1c. Matrices
+## 2. Matrices
 
 The most common way of subsetting matrices (2d) is a simple generalization of 1d subsetting: you supply a 1d index for each dimension, separated by a comma. Blank subsetting is now useful because it lets you keep all rows or all columns.
 
@@ -202,7 +266,8 @@ a[0, -2]
 a[c(1,2) , -2]
 ```
 
-### 1d. Data frames
+
+## 3. Data frames
 
 Data from data frames can be addressed like matrices (with row and column indicators separated by a comma).
 
@@ -241,47 +306,15 @@ class((df["x"]))
 class((df[, "x"]))
 ```
 
-See the bottom section on [Simplying and Preserving to know more](#simplify-preserve)
-
-#### 1d.1. Slicing, selecting, and filtering
-
-We learned the tidyverse framework last week. Let's take advantage of that to do subsetting dataframe in an easy way. Just remember slice is for selecting rows, select is for selecting columns, and filter is for selecting rows based on logical conditions.  
-
-First, let's recap piping (%>%) for those missed the class. [The following example](https://r4ds.had.co.nz/pipes.html) by Wickham is a pseudo code. So consider that only as a thought experiment. 
-
-Pipe takes return value and feeds it in as an input to another function. In UNIX, pipe operator is |. 
-
-```{r, eval = FALSE}
-x %>% f %>% g # equals g(f(x))
-```
-
-```{r, eval = FALSE}
-# Without piping
-foo_foo_1 <- hop(foo_foo, through = forest)
-foo_foo_2 <- scoop(foo_foo_1, up = field_mice)
-foo_foo_3 <- bop(foo_foo_2, on = head)
-
-# With timping 
-foo_foo %>%
-  hop(through = forest) %>%
-  scoop(up = field_mice) %>%
-  bop(on = head)
-```
-Now, let's work with the real data.
+Because data frames are lists of columns, you can use `[[` or `$` to extract columns (see below). 
 
 ```{r}
-library(tidyverse)
-
-df %>%
-  slice(c(1,2)) # first 2 rows
-
-df %>%
-  select(c(1,2)) # first 2 columns 
-
+df[, "x"]
+df$x
+df[["x"]]
 ```
 
-
-#### Exercises
+### 3.1. Exercises
 
 1.  Fix each of the following common data frame subsetting errors:
 
@@ -305,14 +338,31 @@ mtcars[mtcars$cyl == 4 | mtcars$cyl == 6, ]
 2.  Why does `mtcars[1:20]` return an error? How does it differ from the 
 similar `mtcars[1:20, ]`?
 
-# 2. Subsetting operators {#subsetting-operators}
 
-There are two other subsetting operators: `[[` and `$`. 
+**********************************************************
+
+## 4. Lists
+
+Subsetting a list works in the same way as subsetting an atomic vector BUT we often want to use `[[` or `$` instead of `[`. 
+
+Using `[` will always return a list; `[[` and `$`, as described below, let you pull out the components of the list.
 
 * `[[` is similar to `[`, except it can only return a single value and it allows you to pull pieces out of a list. 
 * `$` is a useful shorthand for `[[` combined with character subsetting. 
 
-### 2a. `[[`
+Examples: 
+```{r}
+l <- list('comp1' = c(1,2,3), 'comp2' = 2)
+l
+  
+l[1]
+l[[1]]
+l['comp1']
+l$comp1
+l[['comp1']]
+```
+
+### 4.1. `[[`
 
 You need `[[` when working with lists. This is because when `[` is applied to a list it always returns a list: it never gives you the contents of the list. To get the contents, you need `[[`:
 
@@ -334,7 +384,7 @@ mtcars[ ,1]
 mtcars[1]
 ```
 
-### 2b. `$`
+### 4.2. `$`
 
 `$` is a shorthand operator, where `x$y` is equivalent to `x[["y", exact = FALSE]]`.  It's often used to access variables in a data frame:
 
@@ -355,7 +405,7 @@ mtcars$var
 mtcars[[var]]
 ```
 
-#### Exercises
+### 4.3. Exercises
 
 1.  Take a look at the linear model below: 
 
@@ -366,134 +416,147 @@ summary(mod)
 
 Extract the R squared from the model summary.
 
-```{r, error = TRUE}
+```{r, eval=FALSE, error = TRUE}
 mod.sum <- summary(mod)
 mod.sum$______ # Fill in here
-
 ```
 
-# 3. Subassignment {#subassignment}
 
-All subsetting operators can be combined with assignment to modify selected values of the input vector.
+**********************************************************
 
-```{r, error = TRUE}
-x <- 1:5
-x
-x[c(1, 2)] <- 2:3
-x
+## 5. Subsetting with `dplyr`
 
-# The length of the LHS needs to match the RHS!
-x[-1] <- 4:1
-x
+2D data structures like data frames (and tibbles) can be subset using the dplyr functions. In general, these are easier to use than base R. 
 
-x[1] <- 4:1
+For this section, we will use the gapminder dataset from last week. 
+```{r}
+library(gapminder) #includes gapminder dataset 
 
-# This is mostly useful when conditionally modifying vectors
-df <- data.frame(a = c(1, 10, NA))
-df
-df$a[df$a < 5] <- 0
-df
+# Look at structure 
+glimpse(gapminder)
+
+# Print random sample of 10 rows 
+gapminder %>% sample_n(size=10) %>% print.data.frame()
 ```
 
-# 4. Applications {#applications}
 
-The basic principles described above give rise to a wide variety of useful applications. Some of the most important are described below. Many of these basic techniques are wrapped up into more concise functions (e.g., `subset()`, `merge()`, `plyr::arrange()`), but it is useful to understand how they are implemented with basic subsetting. This will allow you to adapt to new situations that are not dealt with by existing functions.
+### 5.1. Subset Columns 
 
-### 4a. Ordering Columns
+`select()` function: 
+```{r}
+# Subset columns 
+gapminder %>% select(country, pop) %>% head()
+gapminder %>% select(-country) %>% head()
 
-Consider we have this data frame:
+# Reorder columns 
+gapminder %>% select(pop, country) %>% head()
+
+# Subset columns with variable names that match string  
+gapminder %>% select(contains("co"))
+
+# Subset columns by number 
+gapminder %>% select(1:2)
+```
+
+Tidyverse select helpers:
+
+* starts_with(): Starts with a prefix.
+* ends_with(): Ends with a suffix.
+* contains(): Contains a literal string.
+* matches(): Matches a regular expression.
+* num_range(): Matches a numerical range like x01, x02, x03.
+* one_of(): Matches variable names in a character vector.
+* everything(): Matches all variables.
+* last_col(): Select last variable, possibly with an offset.
+
+
+### 5.2. Subset Rows 
+
+`slice()` to subset by row number
+```{r}
+gapminder %>% slice(40:45)
+```
+
+`filter()` to subset otherwise 
+```{r}
+gapminder %>% filter(country=="France") %>% head()
+gapminder %>% filter(pop > 1e8) %>% head()
+```
+
+### 5.3. Ordering 
+
+`arrange()` sorts rows 
 
 ```{r}
-df <- data.frame(
-  Country = c("Iraq", "China", "Mexico", "Russia", "United Kingdom"),
-  Region = c("Middle East", "Asia", "North America", "Eastern Europe", "Western Europe"),
-  Language = c("Arabic", "Mandarin", "Spanish", "Russian", "English")
-)
-df
+# Smallest to largest
+gapminder %>% arrange(pop) %>% head()
+# Largest to smallest 
+gapminder %>% arrange(desc(pop)) %>% head()
+# A to Z
+gapminder %>% arrange(continent) %>% head()
+# Z to A
+gapminder %>% arrange(desc(continent)) %>% head()
 ```
 
-What if we wanted to reorder the columns so that `Region` is first? We can do so using subsetting with the names (or number) of the columns:
+### Unique rows 
+
+`distinct` removes all duplicate rows.
 
 ```{r}
-df <- data.frame(
-  Country = c("Iraq", "China", "Mexico", "Russia", "United Kingdom"),
-  Region = c("Middle East", "Asia", "North America", "Eastern Europe", "Western Europe"),
-  Language = c("Arabic", "Mandarin", "Spanish", "Russian", "English")
-)
+# No duplicate rows
+gapminder %>% nrow
+gapminder %>% distinct %>% nrow
 
-# reorder columns using names
-names(df)
-df1 <- df[, c("Region", "Country", "Language")]
-df1
-
-# reorder columns using indices
-names(df)
-df1 <- df[, c(2,1,3)]
-df1
+# Duplicate values within columns 
+gapminder %>% distinct(continent)
 ```
 
-One helpful function is the `order` function, which takes a vector as input and returns an integer vector describing how the subsetted vector should be ordered:
 
+### 5.4. Exercises {.tabset}
+
+#### Questions 
+
+Remember to use good commenting practices! 
+
+1. Subset gapminder dataset to only Angola and Brazil in 2007-2010. Drop continent, lifeExp, and gdpPercap columns. 
+
+2. Subset gapminder dataset to 5 largest countries by gdpPercap in Africa in 2007. 
+
+#### Answers 
+
+Here is one possible way to answer the exercises...
+
+A1. Subset gapminder dataset to only Angola and Brazil in 2007-2010. Drop continent, lifeExp, and gdpPercap columns. 
 ```{r}
-x <- c("b", "c", "a")
-order(x)
-x[order(x)]
+gapminder %>% 
+  # Subset to angola and brazil 
+    filter(country %in% c("Angola", "Brazil")) %>%
+  # Subset by year 
+    filter(year %between% c(2007L,2010L)) %>%
+  # Select columns
+    select(country, year, pop)
 ```
+While you could combine these filters into one using the `&` operator, seperating them onto two lines is also acceptable and easier to read. 
 
-Knowing this, we can use `order` to reorder our columns by alphabetical order.
-
-### 4b. Removing (or keeping) columns from data frames
-
-There are two ways to remove columns from a data frame. You can set individual columns to `NULL`: 
-
+A2. Subset gapminder dataset to 5 largest countries by gdpPercap in Africa in 2007. 
 ```{r}
-df <- data.frame(
-  Country = c("Iraq", "China", "Mexico", "Russia", "United Kingdom"),
-  Region = c("Middle East", "Asia", "North America", "Eastern Europe", "Western Europe"),
-  Language = c("Arabic", "Mandarin", "Spanish", "Russian", "English")
-)
-
-df$Language <- NULL
+gapminder %>%
+  # Filter by year
+    filter(year == 2007) %>%
+  # Filter to Africa
+    filter(continent == "Africa") %>%
+  # Arrange by gdpPercap
+    arrange(desc(gdpPercap)) %>%
+  # first 5 rows
+    head(5)
 ```
 
-Or you can subset to return only the columns you want:
 
-```{r}
-df <- data.frame(
-  Country = c("Iraq", "China", "Mexico", "Russia", "United Kingdom"),
-  Region = c("Middle East", "Asia", "North America", "Eastern Europe", "Western Europe"),
-  Language = c("Arabic", "Mandarin", "Spanish", "Russian", "English")
-)
+**********************************************************
 
-df1 <- df[, c("Country", "Region")]
-df1
+## 6. Bonus Items {#bonus-items}
 
-# using negative integers
-df2 <- df[, -3]
-df2
-```
-
-### 4c. Selecting rows based on a condition (logical subsetting)
-
-Because it allows you to easily combine conditions from multiple columns, logical subsetting is probably the most commonly used technique for extracting rows out of a data frame. 
-
-```{r}
-mtcars[mtcars$gear == 5, ]
-mtcars[mtcars$gear == 5 & mtcars$cyl == 4, ]
-```
-
-# 5. Bonus Items {#bonus-items}
-
-### 5a. `subset()`
-
-`subset()` is a specialized shorthand function for subsetting data frames, and saves some typing because you don't need to repeat the name of the data frame.
-
-```{r}
-subset(mtcars, gear == 5)
-subset(mtcars, gear == 5 & cyl == 4)
-```
-
-### 5b. Simplifying vs. preserving subsetting {#simplify-preserve}
+### 6.1 Simplifying vs. preserving subsetting {#simplify-preserve}
 
 It's important to understand the distinction between simplifying and preserving subsetting. Simplifying subsets returns the simplest possible data structure that can represent the output, and is useful interactively because it usually gives you what you want. Preserving subsetting keeps the structure of the output the same as the input, and is generally better for programming because the result will always be the same type. Omitting `drop = FALSE` when subsetting matrices and data frames is one of the most common sources of programming errors. (It will work for your test cases, but then someone will pass in a single column data frame and it will fail in an unexpected and unclear way.)
 
