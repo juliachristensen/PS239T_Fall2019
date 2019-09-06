@@ -1,8 +1,15 @@
-name: "my-website"
+name: "PS239T"
 navbar:
   title: "My Website"
   left:
     - text: "Home"
       href: index.html
-    - text: "RStudio"
-      href: 02_rstudio.html
+    - text: R Basics 
+      menu:
+      - text: "RStudio"
+        href: 02_rstudio.html
+output:
+  html_document:
+    theme: flatly
+    highlight: pygments      
+      
