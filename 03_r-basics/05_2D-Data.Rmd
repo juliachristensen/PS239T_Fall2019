@@ -3,18 +3,25 @@ title: "Two-Dimensional Data in R"
 author: "PS239T"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  pdf_document: default
-  html_document: default
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    df_print: paged
+    theme: united
+    highlight: tango
 ---
 
-#### Outline
+# 2D Data Structures in R
 
 In this markdown file, we build off our new knowledge about one-dimensional data to create and alter new kinds of objects: matrices and dataframes. 
 
 1. [Matrices](#matrices) introduces matrices, data structures for storing 2d data that is all the same class.
 2. [Dataframes](#dataframes) teaches you about the dataframe, the most important data structure for storing data in R, because it stores different kinds of (2d) data.
 
-# 1. Matrices <a name="#matrices"></a>
+**********************************************************
+
+## 1. Matrices <a name="#matrices"></a>
 
 Matrices are created when we combine multiple vectors that all have the same class (e.g., numeric). This creates a dataset with rows and columns. By definition, if you want to combine multiple classes of vectors, you want a dataframe. You can coerce a matrix to become a dataframe, and vice-versa, but as with all vector coercions, the results can be unpredictable, so be sure you know how each variable (column) will convert.
 
@@ -77,11 +84,13 @@ rownames(mdat)
 colnames(mdat)
 ```
 
-# 2. Dataframes <a name="#dataframes"></a>
+**********************************************************
+
+## 2. Dataframes <a name="#dataframes"></a>
 
 A data frame is a very important data type in R. It's pretty much the **de facto** data structure for most tabular data and what we use for statistics. 
 
-### 2a. Creation
+### 2.1. Creation
 
 You create a data frame using `data.frame()`, which takes named vectors as input:
 
@@ -106,7 +115,7 @@ str(df)
 
 In reality, we rarely type up our datasets ourselves, and certainly not in R. The most common way to make a data.frame is by calling a file using `read.csv` (which relies on the `foreign` package), `read.dta` (if you're using a Stata file), or some other kind of data file input.
 
-### 2b. Structure and Attributes
+### 2.2. Structure and Attributes
 
 Under the hood, a data frame is a list of equal-length vectors. This makes it a 2-dimensional structure, so it shares properties of both the matrix and the list. 
 
@@ -171,7 +180,7 @@ nrow(df)
 dim(df)
 ```
 
-### 2c. Testing and coercion
+### 2.3. Testing and coercion
 
 To check if an object is a dataframe, use `class()` or test explicitly with `is.data.frame()`:
 
@@ -189,7 +198,7 @@ You can coerce an object to a dataframe with `as.data.frame()`:
   
 * A matrix will create a data frame with the same number of columns and rows as the matrix.
 
-### 2d. Combining dataframes
+### 2.4. Combining dataframes
 
 You can combine dataframes using `cbind()` and `rbind()`:
 
@@ -220,7 +229,11 @@ str(good)
 
 The conversion rules for `cbind()` are complicated and best avoided by ensuring all inputs are of the same type.
 
-### Exercises
+**********************************************************
+
+## 3. Exercises
+
+### 3.1. Group Exercises 
 
 1.  Create a 3x2 data frame called `basket`. The first column should contain the names of 3 fruits. The second column should contain the price of those fruits. 
 
@@ -260,33 +273,9 @@ cbind(basket, color)
 
 ```
 
-**Other objects**
+### 3.2 Quiz {.tabset}
 
-Missing values are specified with `NA`, which is a logical vector of length 1. `NA` will always be coerced to the correct type if used inside `c()`
-
-```{r}
-x <- c(NA, 1)
-x
-typeof(NA)
-typeof(x)
-```
-
-`Inf` is infinity. You can have either positive or negative infinity.
-
-```{r, eval = TRUE}
-1/0
-1/Inf
-```
-
-`NaN` means Not a number. It's an undefined value.
-
-```{r, eval = TRUE}
-0/0
-```
-
-
-
-# 3. Quiz
+#### Questions
 
 You can check your answers in [answers](#data-structure-answers).
 
@@ -298,7 +287,7 @@ You can check your answers in [answers](#data-structure-answers).
 
 4. How is a list different from an atomic vector? How is a matrix different from a data frame?
 
-### Answers {#data-structure-answers}
+#### Answers {#data-structure-answers}
 
 1.  The three properties of a vector are type (or class), length, and attributes.
    

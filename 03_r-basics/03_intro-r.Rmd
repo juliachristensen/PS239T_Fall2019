@@ -1,0 +1,513 @@
+---
+title: "Introduction to R"
+author: "PS239T"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    df_print: paged
+    theme: united
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+# Document set up
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Basic R 
+
+## 1. Syntax
+
+### 1.1. Functionalized Language 
+
+R is a functionalized language, like Python 3; that means that unlike in bash, you have to enclose the object of the command inside of the command using `( )` parentheses. Let's take a look at some familiar-looking commands:
+
+```{r}
+# Print work directory 
+getwd()
+
+# List objects in environment 
+ls()
+```
+
+**CHALLENGE:** What happens when you forget to add the parentheses at the end of the above commands? 
+
+### 1.2. Comments
+
+Use `#` signs to comment. Comment liberally in your R scripts. Anything to the right of a `#` is ignored by R. For those of you familiar with other languages, there is no doc string, or equivalent to `"""` in R.
+
+
+### 1.3. Assignment Operator 
+
+`<-` is the assignment operator. It assigns values on the right to objects on the left. So, after executing `x <- 3`, the value of `x` is `3`. The arrow can be read as 3 **goes into** `x`.  You can also use `=` for assignments. 
+
+```{r}
+USweird <- "Why use lb for pound!" # Use this
+
+"Why use lb for pound!" = USweird
+```
+
+Nonetheless, can does not mean you should. It is good practice to use `<-` for assignments. `=` should only be used to specify the values of arguments inside of functions. This is what Google and Hadley Wickham recommend, too. If they don't convince you enough, here's [a real example](https://csgillespie.wordpress.com/2010/11/16/assignment-operators-in-r-vs/).
+
+```{r}
+1:10
+mean(x = 1:10) # Does it save x?
+rm(x)
+
+mean(x <- 1:10) # Does it save x?
+rm(x)
+```
+
+### 1.4. Variable names 
+
+Variable names can only contain letters, numbers, the underscore character, and (unlike Python) the period character. Whereas an object name like ```myobject.thing``` would point to the subclass or method ```thing``` of ```myobject``` in Python, R treats ```myobject.thing``` as its own entity. 
+
+### 1.5. Printing
+
+In R, the contents of an object can be printed by either simply executing the the object name or calling the ```print()``` function.
+
+### 1.6. Help 
+
+* `?` + object opens a help page for that specific object
+* `??` + object searches help pages containing the name of the object
+
+```{r, eval = FALSE}
+?mean
+??mean
+help(mean)
+
+# The above three will do same. 
+
+example(ls) # provides example for how to use ls 
+
+help.search("visualization") # search functions and packages that have "visualization" in their descriptions
+```
+
+### 1.7. Indexing starts at 1 
+
+Python users may get confused because indexing starts at 1 instead of 0. 
+
+### 1.8. Piping 
+
+Piping exists in many languages (i.e. Unix). In R, pipes use the syntax `%>%`. Pipes are not included in base R, but they are included as part of many packages, including `tidyverse`. 
+
+Simple example:
+```{r}
+# Install pipes package
+# install.packages("magrittr") #rmarkdown fails if uncommented
+library(magrittr)
+
+# Load built-in dataset
+data(state)
+
+# Base R
+summary(data.frame(abbreviation = state.abb, 
+                   name = state.name, 
+                   region = state.region))
+
+# Piping 
+data.frame(abbreviation = state.abb, 
+                   name = state.name, 
+                   region = state.region) %>%
+  summary()
+```
+
+Pipes automatically assign the output of the code to the left of the pipe as the first argument in the following function. If you want to assign the output to a different argument, you can use the period symbol (.).
+
+Why use pipes?
+* Easier to read code: cleaner code that reads left to right with minimal nesting
+* Easier to add steps to code
+
+
+**********************************************************
+
+## 2. Environment
+
+### 2.1. Objects
+
+Using objects allows us to tell our computers to do complex analysis with just a few lines of code. 
+
+Example: 
+```{r, eval = FALSE}
+# Install packages
+install.packages("dplyr")
+install.packages("gapminder")
+
+# Load packages 
+library(dplyr) #tidyverse data manipulation 
+library(gapminder) #includes gapminder dataset 
+
+# Print random sample of 10 rows 
+gapminder %>% sample_n(size=10) %>% print.data.frame()
+
+# Calc avg gdpPercap by country 
+gapminder %>%
+  # filter by Europe
+    filter(continent == "Europe") %>% 
+  # group by country 
+    group_by(country) %>% 
+  # collapse data by mean 
+    summarize(Mean = mean(gdpPercap)) %>% 
+  # count only top 5 by mean 
+    top_n(5, Mean) %>% 
+  # arrange by descending order
+    arrange(desc(Mean)) 
+
+# Now, write the above code as a function 
+summarise_top5_gdpPercap <- function(dat, geo = c("Asia","Europe","Africa","Americas","Oceania"))
+{
+  # Calc avg gdpPercap by country 
+  dat %>% 
+    # filter by Europe
+      filter(continent %in% geo) %>% #function input
+    # group by country 
+      group_by(country) %>% 
+    # collapse data by mean 
+      summarize(Mean = mean(gdpPercap)) %>% 
+    # count only top 5 by mean 
+      top_n(5, Mean) %>% 
+    # arrange by descending order
+      arrange(desc(Mean)) 
+}
+
+# Use function 
+summarise_top5_gdpPercap(dat=gapminder, geo="Europe")
+summarise_top5_gdpPercap(dat=gapminder, geo=c("Europe","Asia"))
+```
+
+**Challenge:** Why did I change the filter() line when I functionalized the code? 
+
+
+
+### 2.2. Viewing and Manipulating Objects in environment 
+
+First, let's clear your environment and load one of R's built-in datasets. 
+```{r}
+# Remove all objects 
+rm(list = ls())
+
+# Load built-in datasets 
+data(state) #vectors
+data(cars) #data.frame
+
+# Create example function
+example_fun <- function() print("Test") #prints the word 'Test'
+
+# Confirm that we have a data.frame, value/vector, and function in the global environment. 
+class(state.abb)
+class(cars)
+class(example_fun)
+```
+
+List objects in your current environment. 
+```{r}
+# Print list of objects in environment 
+ls()
+```
+Note that the global environment includes data.frames, vectors, and user-defined functions. 
+
+We can remove a single object or all objects from the global environment. 
+```{r}
+# Remove state.abb only 
+rm(state.abb)
+
+# Remove everything except functions
+rm(list = setdiff(ls(), lsf.str())) #nested functions
+
+# Remove everything 
+rm(list = ls()) #nested functions
+```
+
+Force memory release.
+```{r}
+gc()
+```
+
+**CHALLENGE:** Why is it good practice to delete everything in your global environment at the beginning of each script or RMarkdown document? 
+
+
+**********************************************************
+
+## 3. Packages 
+
+### 3.1. Adding packages using Base R
+
+`install.packages(package-name)` will download a package from one of the CRAN mirrors assuming that a binary is available for your operating system. If you have not set a preferred CRAN mirror in your `options()`, then a menu will pop up asking you to choose a location.
+
+`library(package-name)` will load a package so you can use it. It is required at the beginning of each R session.
+
+Example: 
+```{r, eval = FALSE}
+# install.packages("stats") #rmarkdown fails if uncommented
+library(stats)
+```
+
+
+### 3.2. Loading multiple packages 
+
+If you have multiple packages to install, then please consider using pacman package. It checks to see if a package is installed, if not it attempts to install the package from CRAN and/or any other repository in the pacman repository list. p_load can also automatically check for and download package updates. 
+
+The following is the example. First, you install pacman. Then, you load several libraries by using p_load method.
+```{r, eval = FALSE}
+# install.packages("pacman") #rmarkdown fails if uncommented
+
+pacman::p_load(
+  ggplot2,
+  dplyr, 
+  broom
+)
+```
+
+If you don't like to use pacman, then the other option is to create a list. (We're going to learn what is list soon.)
+```{r, eval = FALSE}
+pkgs <- c("ggplot2", "dplyr", "broom")
+
+install.packages(pkgs)
+```
+  
+Still, we have to write two lines. The simpler, the better, right? Here's another approach that can simplify the code further.
+
+Note that lapply applies (there's a family of apply functions) a function to a list. In this case, library to pkgs. apply is an advanced concept, which is related to anonymous functions. We will learn about it later when we study functions.
+```{r, eval = FALSE}
+inst = lapply(pkgs, library, character.only = TRUE)
+```
+
+
+### 3.3. Tips
+
+Use the double colon (`::`) operator when 
+* there is any chance of multiple functions using the same name 
+* you want to remember what package is required to use a function 
+
+Regularly clear your list of packages. Either using pacman::p_unload() or by restarting R. 
+
+Load packages at the beginning of a document and leave comments that describe how you are using a package. 
+
+
+### 3.4. Useful packages 
+
+```{r}
+# install.packages("pacman") #rmarkdown fails if uncommented
+
+pacman::p_load(
+  tidyverse, #downloads all tidyverse packages
+  data.table, #big datasets 
+  magrittr #better piping 
+)
+```
+
+
+**********************************************************
+
+## 4. Style Guide 
+
+Most of contents here are adapted from https://style.tidyverse.org. 
+
+Use styler package in R to learn how to format your code to according to the style guide here.
+
+**Five rules:**
+
+- Write code as if you're writing a paper.
+- Organize files. 
+- Comment religiously. 
+- Reuse functions. 
+- Do version control. 
+
+### 4.1. Naming 
+
+#### 4.1.1. Files 
+
+When naming files:
+
+  - Don't use special characters.
+  - Don't capitalize.
+  - Numbering them if files should be run in an order.
+
+```{r, eval= FALSE}
+# Good
+fit_models.R
+
+# Bad
+fit models.R
+```
+
+#### 4.1.2. Objects 
+
+When naming objects:
+
+  - Don't use special characters.
+  - Don't capitalize.
+  - Numbering them if files should be run in an order.
+
+```{r, eval = FALSE}
+# Good 
+day_one
+    
+# Bad 
+DayOne
+```
+
+#### 4.1.3. Functions
+
+When naming functions:
+
+  - Don't use special characters.
+  - Don't capitalize.
+  - Use verbs instead of nouns.
+
+```{r, eval = FALSE}
+# Good 
+run_rdd 
+
+# Bad 
+rdd
+```
+
+
+### 4.2. Spacing 
+
+```{r, eval = FALSE}
+# Good
+x[, 1] 
+
+mean(x, na.rm = TRUE) 
+
+if (debug) show(x) 
+
+function(x) {}
+
+height <- (feet * 12) + inches
+
+sqrt(x^2 + y^2)
+
+# Bad
+x[,1]
+
+mean (x, na.rm = TRUE)
+
+if(debug) show(x)
+
+function(x){}
+
+height <- (feet*12) + inches
+
+sqrt(x ^ 2 + y ^ 2)
+```
+
+
+### 4.3. Indenting 
+
+```{r eval= FALSE}
+# Good
+if (y < 0 && debug) {
+  message("y is negative")
+}
+
+# Bad
+if (y < 0 && debug)
+message("Y is negative")
+```
+
+### 4.4. Split long lines
+
+```{r, eval = FALSE}
+# Good
+do_something_very_complicated(
+  something = "that",
+  requires = many,
+  arguments = "some of which may be long"
+)
+
+# Bad
+do_something_very_complicated("that", requires, many, arguments,
+                              "some of which may be long"
+                              )
+```
+
+### 4.5. Comments 
+
+- Use comments for findings and analysis decisions. 
+- Show your code; Do not try to explain your code by comments.
+- Inside functions, use comments to explain **why**
+
+### 4.6. Pipes 
+
+Line break after each pipe.
+
+```{r, eval = FALSE}
+# Good
+iris %>%
+  group_by(Species) %>%
+  summarize_if(is.numeric, mean) %>%
+  ungroup() %>%
+  gather(measure, value, -Species) %>%
+  arrange(value)
+
+# Bad
+iris %>% group_by(Species) %>% summarize_all(mean) %>%
+ungroup %>% gather(measure, value, -Species) %>%
+arrange(value)
+
+```
+
+
+**********************************************************
+
+## 5. Data Structures
+
+### 5.1. Data Types (Classes)
+
+`R`'s main atomic classes are:
+
+* character (or a "string" in Python and Stata)
+* numeric (integer or float)
+* integer (just integer)
+* logical (booleans)
+
+| Example | Type |
+| ------- | ---- |
+| "a", "swc" | character |
+| 2, 15.5 | numeric | 
+| 2 (Must add a `L` at end to denote integer) | integer |
+| `TRUE`, `FALSE` | logical |
+
+
+### 5.2. Data Structures 
+
+R's base data structures can be organised by their dimensionality (1d, 2d, or nd) and whether they're homogeneous (all contents must be of the same type) or heterogeneous (the contents can be of different types). This gives rise to the five data types most often used in data analysis: 
+
+|    | Homogeneous   | Heterogeneous |
+|----|---------------|---------------|
+| 1d | Atomic vector | List          |
+| 2d | Matrix        | Data frame    |
+| nd | Array         |               |
+
+Each data structure has its own specifications and behavior. For our purposes, an important thing to remember is that R is always **faster** (more efficient) working with homogenous (**vectorized**) data.
+
+### 5.3. Other objects
+
+Missing values are specified with `NA`, which is a logical vector of length 1. `NA` will always be coerced to the correct type if used inside `c()`
+
+```{r}
+x <- c(NA, 1)
+x
+typeof(NA)
+typeof(x)
+```
+
+`Inf` is infinity. You can have either positive or negative infinity.
+
+```{r, eval = TRUE}
+1/0
+1/Inf
+```
+
+`NaN` means Not a number. It's an undefined value.
+
+```{r, eval = TRUE}
+0/0
+```
+

@@ -21,7 +21,7 @@ We will be interacting with R using RStudio.
 RStudio is an integrated development environment (IDE) for the R software package. An IDE is software that helps computer programmers develop software by combining tools and improving user interface. RStudio is the most popular IDE for R.
 
 
-## Advantages of R
+## Why R is good
 
 1. Open source 
 	* Free to download (for non-commercial use) 
@@ -50,7 +50,7 @@ RStudio is an integrated development environment (IDE) for the R software packag
 	* Object oriented (R has objects) and functional (you can write functions).
 
 
-## Disadvantages of R
+## Why R is annoying
 
 R is a quirky language -- Some quirks are really useful but others are annoying. 
 	* R is inconsistent 
@@ -81,7 +81,11 @@ R users and developers have less computer science training.
 
 
 
-### Using R and Python together 
+***************************************************************************
+
+## More Information
+
+### A1: Using R and Python together 
 
 As long as you save the file at the end of a script, you can run a sequence of python and R scripts seperately. 
 
@@ -96,19 +100,7 @@ As long as you save the file at the end of a script, you can run a sequence of p
 See [this article](https://towardsdatascience.com/from-r-vs-python-to-r-and-python-aa25db33ce17) for more information. 
 
 
-## RStudio
-
-We will be interacting with R using RStudio. 
-
-RStudio is an **integrated development environment (IDE)** for the R software package. An **IDE** is software that helps computer programmers develop software by combining tools and improving user interface. RStudio is the most popular IDE for R. 
-
-In the next unit, we will be exploring RStudio and using a feature called RMarkdown to learn more about R. 
-
-
-
-***************************************************************************
-
-## Bonus: More about R
+### A2: Bonus: More about R
 
 From [Hadley Wickham](http://adv-r.had.co.nz/Introduction.html):
 

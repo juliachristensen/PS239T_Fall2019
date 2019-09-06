@@ -6,6 +6,20 @@ When you have a problem, google it! Pay special attention to any StackOverflow l
 
 > *Tip:* before googling, figure out if you are using a tidyverse package like dplyr. If so, include the name of the package in your google search. For example, if you can't figure out how to add a variable to a dataframe, search "R add variable dataframe dplyr" or "R add variable dataframe tidyverse". 
 
+### Miminal reproducible example 
+
+Chances are you're going to use StackOverFlow a lot to solve a pressing problem you face. However, other can't understand/be interested in your problem unless you can provide an example which they can understand with minimal efforts. Such example is called a minimal reproducible example. 
+
+Read [this StackOverFlow post](https://stackoverflow.com/questions/5963269/how-to-make-a-great-r-reproducible-example) to understand the concept and best practices.
+
+Simply put, a MRE consists of the following items:
+
+- A minimal dataset 
+- the minimal burnable code
+- the necessary information on package, R version, system (use sessionInfo())
+- (for random process) a seed for reproducibility (set.seed())
+
+
 ## Berkeley Initiatives 
 
 [D-lab](https://dlab.berkeley.edu/): initiative includes working groups, free consulting, trainings, and other resources for learning data science tools 
@@ -98,6 +112,10 @@ RStudio has also started publishing [interactive tutorials](https://rstudio.clou
 
 
 ## Related Topics 
+
+### RMarkdown 
+
+[R Markdown: The Definitive Guide](https://bookdown.org/yihui/rmarkdown/) by Yihui Xie, J. J. Allaire, Garrett Grolemund.
 
 ### Markdown 
 
