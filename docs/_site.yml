@@ -1,6 +1,6 @@
 name: "PS239T"
 navbar:
-  title: "My Website"
+  title: "PS239T"
   left:
     - text: "Home"
       href: index.html
@@ -8,8 +8,17 @@ navbar:
       menu:
       - text: "RStudio"
         href: 02_rstudio.html
+      - text: "Basic R"
+        href: 03_intro-r.html
 output:
   html_document:
     theme: flatly
     highlight: pygments      
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    df_print: paged
+    
+    
+    
       
