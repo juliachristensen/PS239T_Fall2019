@@ -2,9 +2,9 @@
 title: "PS239T"
 ---
 
-# Introduction to Computational Tools for Social Science
+**Introduction to Computational Tools for Social Science**
 
-## Course Description
+# Course Description
 
 This course will provide graduate students the technical skills necessary to conduct research in computational social science and digital humanities, introducing them to the basic computer literacy, programming skills, and application knowledge that students need to be successful in further methods work.
 
@@ -12,6 +12,6 @@ The course is currently divided into five main sections. In the first section, s
 
 Please note that materials are still in development, and will be changing.
 
-## Contact
+# Contact
 
 Instructor: Julia Christensen, jbchristensen@berkeley.edu

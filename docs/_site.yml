@@ -4,20 +4,14 @@ navbar:
   left:
     - text: "Home"
       href: index.html
-    - text: R Basics 
+    - text: "R Basics"
       menu:
       - text: "RStudio"
         href: 02_rstudio.html
-      - text: "Basic R"
-        href: 03_intro-r.html
 output:
   html_document:
-    theme: flatly
-    highlight: pygments      
-    toc: true
-    toc_depth: 4
-    toc_float: true
-    df_print: paged
+    theme: cosmo
+    highlight: textmate
     
     
     

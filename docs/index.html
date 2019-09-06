@@ -15,7 +15,7 @@
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -23,9 +23,24 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
-<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
 
 
 
@@ -91,33 +106,33 @@ summary {
 <style type="text/css">
 /* padding for bootstrap navbar */
 body {
-  padding-top: 60px;
+  padding-top: 51px;
   padding-bottom: 40px;
 }
 /* offset scroll position for anchor links (for fixed navbar)  */
 .section h1 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h2 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h3 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h4 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h5 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h6 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .dropdown-submenu {
   position: relative;
@@ -380,9 +395,6 @@ div.tocify {
     <li>
       <a href="02_rstudio.html">RStudio</a>
     </li>
-    <li>
-      <a href="03_intro-r.html">Basic R</a>
-    </li>
   </ul>
 </li>
       </ul>
@@ -402,18 +414,16 @@ div.tocify {
 </div>
 
 
-<div id="introduction-to-computational-tools-for-social-science" class="section level1">
-<h1>Introduction to Computational Tools for Social Science</h1>
-<div id="course-description" class="section level2">
-<h2>Course Description</h2>
+<p><strong>Introduction to Computational Tools for Social Science</strong></p>
+<div id="course-description" class="section level1">
+<h1>Course Description</h1>
 <p>This course will provide graduate students the technical skills necessary to conduct research in computational social science and digital humanities, introducing them to the basic computer literacy, programming skills, and application knowledge that students need to be successful in further methods work.</p>
 <p>The course is currently divided into five main sections. In the first section, students learn how their computers work and communicate with other computers using git and bash. In the second, we turn our attention to the basics of R and Python. In the third, students learn tools for acquiring data through APIs and webscraping. In the fourth, students will practice using R to clean and analyze data efficiently. In the fifth, students will be exposed to additional means of analyzing and visualizing data, including tools like text analysis and machine learning.</p>
 <p>Please note that materials are still in development, and will be changing.</p>
 </div>
-<div id="contact" class="section level2">
-<h2>Contact</h2>
+<div id="contact" class="section level1">
+<h1>Contact</h1>
 <p>Instructor: Julia Christensen, <a href="mailto:jbchristensen@berkeley.edu">jbchristensen@berkeley.edu</a></p>
-</div>
 </div>
 
 

@@ -1,0 +1,11 @@
+---
+title: "test"
+---
+
+```{r setup, include=FALSE}
+source_rmd <- function(rmd_file){
+  knitr::knit(rmd_file, output = tempfile())
+}
+
+source_rmd("C:/Users/Julia/OneDrive/Documents/Berkeley/2019-08_Fall/PS239T_Fall2019/03_r-basics/03_intro-r.Rmd")
+```
