@@ -109,7 +109,7 @@ To create a markdown document like this one, just open a text editor (i.e. Notep
 
 ### LaTeX 
 
-To write equations in an RMarkdown document, you can use LaTeX syntax. However, note that this feature tends to be buggy. Some 
+To write equations in an RMarkdown document, you can use LaTeX syntax. However, note that this feature tends to be buggy.
 
 Useful links: 
 * [Detexify](http://detexify.kirelabs.org/classify.html): looks up LaTeX command that matches a shape that you have drawn using your mouse. 

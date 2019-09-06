@@ -4,13 +4,21 @@
 
 R is an open source programming/scripting language used primarily for statistics and data science. 
 
+
 ### Base R and Packages
 
-R automatically comes with a set of packages (functions and datasets) that are collectively referred to as "Base R". 
+R automatically comes with a set of packages (functions and datasets) that are collectively referred to as **Base R.** 
 
 Typically, we download additional packages because Base R isn't sufficient. Instead of trying to centrally write and distribute code, R relies on its users to identify and write packages to provide added functionality. This system contrasts with rival software like Stata or Excel where one centralized entity writes all of the underlying code for Stata. 
 
-"Tidyverse" is a set of packages that have revolutionized how people program in R. 
+**Tidyverse** is a set of packages that have revolutionized how people program in R. The creator of tidyverse, Hadley Wickham, is probably the most famous person in the R community today. He is also good at explaining things, which is why he is quoted so many times here. 
+
+
+### RStudio 
+
+We will be interacting with R using RStudio.
+
+RStudio is an integrated development environment (IDE) for the R software package. An IDE is software that helps computer programmers develop software by combining tools and improving user interface. RStudio is the most popular IDE for R.
 
 
 ## Advantages of R
@@ -42,14 +50,7 @@ Typically, we download additional packages because Base R isn't sufficient. Inst
 	* Object oriented (R has objects) and functional (you can write functions).
 
 
-> Sidenote: Who is Hadely Wickam?
-> 
-> Hadley Wickham is probably the most famous person in the R community today. He has built some of the most popular packages, most of which will be used in this course. He also works for RStudio. 
->
-> He is also good at explaining things, which is why he is quoted so many times here. 
-
-
-## Why is R annoying?
+## Disadvantages of R
 
 R is a quirky language -- Some quirks are really useful but others are annoying. 
 	* R is inconsistent 
@@ -76,7 +77,8 @@ R users and developers have less computer science training.
 >
 > The R users are generally not as confident in their programming skills. They really like R, but can’t argue with the engineering team, because they don’t have the language to make that argument. People using R tend to have these backgrounds in biology or marketing and they don’t have the vocabulary. R is a weird language but it is weird for good reasons, and it’s a really good fit for data science. It’s not a general purpose programming language, but there are good reasons for a lot of the things it does.
 >
-> - Hadley Wickam in an [August 2019 interview](https://qz.com/1661487/hadley-wickham-on-the-future-of-r-python-and-the-tidyverse/)
+> -Hadley Wickam in an [August 2019 interview](https://qz.com/1661487/hadley-wickham-on-the-future-of-r-python-and-the-tidyverse/)
+
 
 
 ### Using R and Python together 
@@ -109,7 +111,6 @@ In the next unit, we will be exploring RStudio and using a feature called RMarkd
 ## Bonus: More about R
 
 From [Hadley Wickham](http://adv-r.had.co.nz/Introduction.html):
-# Note - this is the guy who wrote ggplot. We'll see his work again soon!
 
 If you are new to R, you might wonder what makes learning such a quirky language worthwhile. In my opinion, R's some of the best features are:
 
