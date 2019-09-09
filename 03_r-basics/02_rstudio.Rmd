@@ -100,9 +100,9 @@ Resources for using RMarkdown.
 
 1. Open the original R program. How does RStudio improve your quality of life?  
 
-2. Create two new documents in RStudio (you don't need to save them). One document should be an R script file and the other should be an RMarkdown file. Run `getwd()` in each to see the default working directory. What is the difference? Why does this matter? 
+2. Add your name below and knit this document. 
 
-
+**[ADD YOUR NAME HERE]**
 
 
 
