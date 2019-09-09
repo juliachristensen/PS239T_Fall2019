@@ -52,18 +52,23 @@ RStudio is an integrated development environment (IDE) for the R software packag
 
 ## Why R is annoying
 
-R is a quirky language -- Some quirks are really useful but others are annoying. 
+1. R is a quirky language -- Some quirks are really useful but others are annoying. 
 
 	* R is inconsistent 
+
 		* Lots of special cases where syntax deviates from the normal pattern 
 		* A popular set of packages called tidyverse adds to this challenge by using different (generally better) syntax. At this point, tidyverse is so extensive that it often feels like a seperate language.  
+
 	* R is slow at doing some important things 
+
 		* Writing fast code in R is an advanced topic 
+
 	* R is not great for big data 
-		* parallel processing not well implemented 
+
+		* parallel processing not widely implemented 
 		* bad at managing memory 
 
-R users and developers have less computer science training. 
+2. R users and developers have less computer science training. 
 
 	* Code and packages are often badly written 
 	* Quality control practices not widespread  
