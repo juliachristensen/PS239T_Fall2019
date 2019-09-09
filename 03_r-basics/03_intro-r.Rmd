@@ -132,14 +132,15 @@ summary(data.frame(abbreviation = state.abb,
 
 # Piping 
 data.frame(abbreviation = state.abb, 
-                   name = state.name, 
-                   region = state.region) %>%
+           name = state.name, 
+           region = state.region) %>%
   summary()
 ```
 
 Pipes automatically assign the output of the code to the left of the pipe as the first argument in the following function. If you want to assign the output to a different argument, you can use the period symbol (.).
 
 Why use pipes?
+
 * Easier to read code: cleaner code that reads left to right with minimal nesting
 * Easier to add steps to code
 
@@ -153,17 +154,17 @@ Why use pipes?
 Using objects allows us to tell our computers to do complex analysis with just a few lines of code. 
 
 Example: 
-```{r, eval = FALSE}
+```{r}
 # Install packages
-install.packages("dplyr")
-install.packages("gapminder")
+# install.packages("dplyr")
+# install.packages("gapminder")
 
 # Load packages 
 library(dplyr) #tidyverse data manipulation 
 library(gapminder) #includes gapminder dataset 
 
 # Print random sample of 10 rows 
-gapminder %>% sample_n(size=10) %>% print.data.frame()
+gapminder %>%  sample_n(size=10) 
 
 # Calc avg gdpPercap by country 
 gapminder %>%
@@ -219,8 +220,11 @@ data(cars) #data.frame
 example_fun <- function() print("Test") #prints the word 'Test'
 
 # Confirm that we have a data.frame, value/vector, and function in the global environment. 
+# 1) Character vector 
 class(state.abb)
+# 2) data.frame
 class(cars)
+#3) Function
 class(example_fun)
 ```
 
@@ -301,6 +305,7 @@ inst = lapply(pkgs, library, character.only = TRUE)
 ### 3.3. Tips
 
 Use the double colon (`::`) operator when 
+
 * there is any chance of multiple functions using the same name 
 * you want to remember what package is required to use a function 
 
