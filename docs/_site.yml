@@ -1,0 +1,18 @@
+name: "PS239T"
+navbar:
+  title: "PS239T"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "R Basics"
+      menu:
+      - text: "RStudio"
+        href: 02_rstudio.html
+output:
+  html_document:
+    theme: cosmo
+    highlight: textmate
+    
+    
+    
+      

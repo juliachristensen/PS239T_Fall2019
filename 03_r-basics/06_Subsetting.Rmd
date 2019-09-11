@@ -498,7 +498,7 @@ gapminder %>% arrange(continent) %>% head()
 gapminder %>% arrange(desc(continent)) %>% head()
 ```
 
-### Unique rows 
+### 5.4. Unique rows 
 
 `distinct` removes all duplicate rows.
 
@@ -512,15 +512,25 @@ gapminder %>% distinct(continent)
 ```
 
 
-### 5.4. Exercises {.tabset}
+### 5.5. Exercises {.tabset}
 
 #### Questions 
 
 Remember to use good commenting practices! 
 
 1. Subset gapminder dataset to only Angola and Brazil in 2007-2010. Drop continent, lifeExp, and gdpPercap columns. 
+```{r}
+
+```
 
 2. Subset gapminder dataset to 5 largest countries by gdpPercap in Africa in 2007. 
+```{r}
+
+```
+
+
+
+
 
 #### Answers 
 

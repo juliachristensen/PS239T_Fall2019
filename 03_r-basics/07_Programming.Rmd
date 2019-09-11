@@ -3,8 +3,13 @@ title: 'More Advanced Programming in R: Lecture Notes'
 author: "PS239T"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  html_document: default
-  pdf_document: default
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    df_print: paged
+    theme: flatly
+    highlight: pygments
 ---
 
 We've already learned about types in R. Now let's discuss some more advanced programming in R - namely:
@@ -15,19 +20,25 @@ We've already learned about types in R. Now let's discuss some more advanced pro
 4. [Loops](#loops)
 5. [Vectorized Functions](#vectorization)
 
-# Setup environment
+# 0. Setup environment
 
-```{r eval=F}
-# remove all objects
+```{r}
+# Remove all objects
 rm(list=ls())
 
+# Load packages
+pacman::p_load(
+  tidyverse,
+  magrittr #piping
+)
 ```
 
 # 1. Strings {#strings}
 
-### 1.1 Intro to Operations on Strings
+## 1.1 Intro to Operations on Strings
 
 ```{r}
+# Example strings
 firstName <- "Jae Yeon"
 lastName <- "Kim"
 ```
@@ -35,26 +46,23 @@ lastName <- "Kim"
 Unlike in Python, R does not have a reserved operator for string concatenation such as `+`.  Furthermore, using the usual concatenation operator ```c()``` on two or more character strings will not create a single character string, but rather a **vector** of character strings. 
 
 ```{r}
-fullName <- c(firstName, lastName)
-
-print(fullName)
-
+# Combine strings into vector length 2
+fullName <- c(firstName, lastName) %>% print()
 length(fullName)
 ```
 
 In order to combine two or more character strings into one larger character string, we use the ```paste()``` function.  This function takes character strings or vectors and collapses their values into a single character string, with each value separated by a character string selected by the user.
 
 ```{r}
-fullName <- paste(firstName, lastName)
+# Paste without space 
+fullName <- paste0(firstName, lastName) %>% print()
 
-print(fullName)
+# Default paste option (adds space)
+fullName <- paste(firstName, lastName) %>% print()
 
-fullName <- paste(firstName, lastName, sep = "+")
-
-print(fullName)
-
-fullName <- paste(firstName, lastName, sep = "___")
-print(fullName)
+# Paste with different seperators 
+fullName <- paste(firstName, lastName, sep = "+") %>% print()
+fullName <- paste(firstName, lastName, sep = "___") %>% print()
 ```
 
 As with Python, R can also extract substrings based on the index position of its characters.  There are, however, two critical differences.  First, **index positions in R start at 1**.  This is in contrast to Python, where indexation starts at 0.  
@@ -64,23 +72,25 @@ Second, **object subsets using index positions in R contain all the elements in 
 Third, **R does not allow indexing of character strings***. Instead, you must use the ```substr()``` function.  Note that this function must receive both the ```start``` and ```stop``` arguments.  So if you want to get all the characters between some index and the end of the string, you must make use of the ```nchar()``` function, which will tell you the length of a character string.
 
 ```{r}
-
 fullName <- paste(firstName, lastName)
 
 # this won't work like in Python
 fullName[1] # R sees the string as a unitary object - it can't be indexed this way
 fullName[1:4] 
 
-# So use this instead
+# So use this instead (baser)
 substr(x = fullName, start = 1, stop = 2)
 substr(x = fullName, start = 5, stop = 5)
 substr(x = fullName, start = 1, stop = 10)
 substr(x = fullName, start = 11, stop = nchar(fullName))
+
+# With stringr
+str_sub(fullName, 1, 2)
 ```
 
-### 1.2 Character String Methods
+## 1.2 Character String Functions
 
-Like Python, R has a number of string methods, though these exist as individual rather than "mix-and-match" functions. For example:
+Like Python, R has a number of string functions, though these exist as individual rather than "mix-and-match" functions. For example:
 
 ```{r}
 toupper(x = fullName)
@@ -96,6 +106,123 @@ gsub(pattern = "Jae Yeon", replacement = "Danny", x = fullName)
 
 gsub(pattern = " ", replacement = "", x = fullName) # The same function is used for replacements and stripping
 ```
+
+## 1.3. Exercises {.tabset}
+
+The following exercises are adapted from https://www.r-exercises.com/2018/01/22/stringr-basic-functions-exercises/. 
+
+### Questions
+
+1. Load (and install) the stringr and gapminder package. For a warm up, create a new data frame called df that contains only the columns for country name and continent from the gapminder dataset. (Use either base R or dplyr select function). Then filter to only include the unique country-continent combinations. 
+```{r}
+
+```
+
+2. Use a `stringr` function and the `mean()` function to find the average number of characters in the country names. 
+```{r}
+
+```
+
+3. Extract the first and last letter of each country’s name and save as new columns called 'first_letter' and 'last_letter'. 
+```{r}
+
+```
+
+4. What countries have the word “and” as part of their name?
+```{r}
+
+```
+
+5. Delete all instances of "," and "." from the country names and save as new variable called 'country_clean'. 
+```{r}
+
+```
+
+
+### Hints
+
+1. Hint: filter for unique rows using (don't use base R)
+```{r, eval=F}
+df %<>% distinct()
+
+# or 
+df <- distinct(df) 
+```
+
+2. Hint: 
+```{r, eval=F}
+?str_length
+```
+
+5. Hint: 
+```{r, eval=F}
+?str_replace
+?str_replace_all
+
+# Check difference between these two options:
+str_replace_all(df$country, ".", "") %>% head()
+str_replace_all(df$country, fixed("."), "") %>% head()
+```
+
+
+### Answers 
+
+1. Answer: 
+```{r, eval=F}
+# Load packages
+pacman::p_load(stringr, gapminder)
+
+# Check data type
+is.data.frame(gapminder)
+
+# Glimpse gapminder data
+gapminder %>% glimpse()
+
+# Subset and filter for unique rows
+df <- gapminder %>% 
+  dplyr::select(country, continent) %>%
+  dplyr::distinct()
+
+# Glimpse new data (note obs number)
+glimpse(df)
+```
+
+2. Answer: 
+```{r, eval=F}
+mean(str_length(df$country))
+```
+
+3. Answer: 
+```{r, eval=F}
+# Option 1 (baser)
+df$first_letter <- str_sub(df$country, 1, 1)
+df$last_letter <- str_sub(df$country, -1, -1)
+
+# Option 2 (tidyverse)
+df %<>%
+  dplyr::mutate(first_letter = str_sub(country, 1, 1), 
+                last_letter = str_sub(country, -1, -1) )
+```
+
+4. Answer: 
+```{r, eval=F}
+df %>% filter(str_detect(country," and "))
+```
+
+5. Answer: 
+```{r, eval=F}
+# Option 1 (baser) 
+df$country_clean <- str_replace_all(df$country, fixed("."), "")
+df$country_clean <- str_replace_all(df$country_clean, fixed(","), "")
+
+# Option 2 (tidyverse)
+df %<>%
+  mutate(country_clean = str_replace_all(country, fixed(","), "")) %>%
+  mutate(country_clean = str_replace_all(country_clean, fixed("."), "")) 
+```
+
+
+**********************************************************
 
 # 2. Flow Control {#flow-control}
 
@@ -131,8 +258,9 @@ if(x < 0){
 } else{
   print("x is positive")
 }
-
 ```
+
+## 2.1. Logical Coercion 
 
 R also does some class coercion that makes Boolean evaluations harder to break than in Python.  But be careful --- R has a set of special coercion used for fast logical evaluation and subsetting.  Specifically, ```TRUE``` is considered equal to ```1```, while ```FALSE``` is equal to ```0```. The Boolean logicals can also be specified as a full word in all caps, or simply as ```T``` or ```F```.
 
@@ -154,11 +282,50 @@ FALSE == 0
 FALSE <= 1
 ```
 
+## 2.2. Exercises 
+
+1. What type of vector does each of the following calls to ifelse() return?
+```{r}
+ifelse(TRUE, 1, "no")
+ifelse(FALSE, 1, "no")
+ifelse(NA, 1, "no")
+```
+
+2. Why does the following code work?
+```{r}
+# Part 1
+x <- 1:10
+if (length(x)) "not empty" else "empty"
+
+# Part 2
+x <- numeric()
+if (length(x)) "not empty" else "empty"
+```
+
+
+**********************************************************
+
+
 # 3. Functions {#functions}
+
+**Tip:** If you know how to write functions in R, take a look at section 6,  [Debugging](#debugging).
 
 While functions are defined in Python using the ```def``` reserved operator, R sees functions as just another type of named object.  Thus, they require explicit assignment to an object.  This is done using the function ```function()```, which creates a function taking the arguments specified in parentheses.  
 
+## 3.1. Why functions
+
 ```{r, eval = FALSE}
+# Example data frame 
+df <- data.frame(
+  a = c(1, 2, 3, 4, 5, 6, 7, 8, -9, 10),
+  b = c(1, 2, 3, 4, -99, 6, 7, 8, 9, 10),
+  c = c(1, 2, 3, -99, 5, 6, 7, 8, 9, -9),
+  d = c(1, -9, 3, 4, 5, 6, 7, 8, 9, 10),
+  e = c(1, 2, 3, 4, 5, -99, 7, 8, 9, 10),
+  f = c(1, 2, 3, 4, -9, 6, 7, 8, 9, 10),
+)
+
+# Tedious/brute force code 
 df$a[df$a == -99] <- NA
 df$b[df$b == -99] <- NA
 df$c[df$c == -99] <- NA
@@ -166,38 +333,65 @@ df$d[df$d == -99] <- NA
 df$e[df$e == -99] <- NA
 df$f[df$f == -99] <- NA 
 
-# very tedious 
-
+# Now write function  
 fix_missing <- function(x) {
   x[x == -99] <- NA
   x
 }
 
+# Apply function 
 df$a <- fix_missing(df$a)
 df$b <- fix_missing(df$b)
 df$c <- fix_missing(df$c)
 df$d <- fix_missing(df$d)
 df$e <- fix_missing(df$e)
 df$f <- fix_missing(df$e)
-
-# beautiful
-
-source(fix_missings.r)
-
-# more beautiful
 ```
 
-```{r}
-simple.function <- function(x){
-  print(x + 1)
+### 3.1.1. Challenge! 
+
+Oh no! You now find out that there are two codes for missing data. Missing data is coded as both -99 and -9! Change the code so that the values -9 AND -99 are replaced with NA. 
+```{r, eval=F}
+# Tedious/brute force code 
+df$a[df$a == -99] <- NA
+df$b[df$b == -99] <- NA
+df$c[df$c == -99] <- NA
+df$d[df$d == -99] <- NA
+df$e[df$e == -99] <- NA
+df$f[df$f == -99] <- NA 
+
+# Now write function  
+fix_missing <- function(x) {
+  x[x == -99] <- NA
+  x
 }
 
+# Apply function 
+df$a <- fix_missing(df$a)
+df$b <- fix_missing(df$b)
+df$c <- fix_missing(df$c)
+df$d <- fix_missing(df$d)
+df$e <- fix_missing(df$e)
+df$f <- fix_missing(df$e)
+```
+
+
+## 3.2. How to write functions
+
+```{r}
+# Create example fun 1
+simple.function <- function(x) #note { location options
+{
+  print(x + 1)
+}
+# Run example fun 1
 simple.function(x = 2)
 
+# Create example fun 2
 less.simple.function <- function(x, y){
   print(x - y + 1)
 }
-
+# Run example fun 2
 less.simple.function(x = 2, y = 10)
 ```
 
@@ -283,6 +477,13 @@ g <- function(x)
 g(2) # a equals still 1 
 ```
 
+## 3.3. Exercises 
+
+
+
+
+**********************************************************
+
 # 4. Loops {#loops}
 
 Loops in R also work basically the same way as in Python, with just a few adjustments.  First, recall that index positions in R start at 1.  Second, ```while()``` and ```for()``` are functions rather than reserved operators, meaning they must take arguments in parentheses.  Third, just like ```else```, the ```in``` operator *is* reserved and takes no arguments in parentheses.  Fourth, the conditional execution must appear between curly brackets.  Finally, indentation is meaningless, but each new operation must appear on a new line.
@@ -293,22 +494,25 @@ Loops in R also work basically the same way as in Python, with just a few adjust
 ```{r}
 fruits <- c("apples", "oranges", "pears", "bananas")
 
+# a for loop
+for(i in 1:length(fruits)){
+  print(fruits[i])
+}
+
 # a while loop
 i <- 1
 while(i <= length(fruits)){
   print(fruits[i])
   i <- i + 1
 }
-
-# a for loop
-for(i in 1:length(fruits)){
-  print(fruits[i])
-}
 ```
+
+
+**********************************************************
 
 # 5. Vectorization {#vectorization}
 
-### 5.1 Vectorized functions
+## 5.1 Vectorized functions
 
 Most of R’s functions are vectorized, meaning that the function will operate on all elements of a vector without needing to loop through and act on each element one at a time. This makes writing code more concise, easy to read, and less error prone.
 
@@ -346,7 +550,7 @@ log(x)
 
 To learn more about using and speeding up for loops, check out the answers to this post: http://stackoverflow.com/questions/2908822/speed-up-the-loop-operation-in-r
 
-### 5.2 Apply Family
+## 5.2 Apply Family
 
 While and for loops in R can be very slow. For this reason, R has a number of built-in iteration methods to speed up execution times. In many cases, packages will have "behind-the-scenes" ways to avoid for loops, but what if you need to write your own function? 
 
@@ -386,7 +590,11 @@ map(integer(), paste) # return list
 
 The multivariate version of `sapply` is `mapply`. Use this if you have a function that takes in 2 or more arguments.
 
-# 6. Debugging 
+
+
+**********************************************************
+
+# 6. Debugging {#debugging}
 
 ## 6.1. RStudio debugging tools 
 

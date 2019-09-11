@@ -2891,7 +2891,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Subsetting</h1>
 <h4 class="author">PS239T</h4>
-<h4 class="date">06 September, 2019</h4>
+<h4 class="date">11 September, 2019</h4>
 
 </div>
 
@@ -3060,12 +3060,12 @@ div.tocify {
 <a class="sourceLine" id="cb62-8" data-line-number="8">start.time &lt;-<span class="st"> </span><span class="kw">Sys.time</span>() <span class="co">#start clock</span></a>
 <a class="sourceLine" id="cb62-9" data-line-number="9">state.abb <span class="op">%&lt;&gt;%</span><span class="st"> </span>.[. <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;OR&quot;</span>,<span class="st">&quot;CA&quot;</span>)] </a>
 <a class="sourceLine" id="cb62-10" data-line-number="10">(<span class="kw">Sys.time</span>() <span class="op">-</span><span class="st"> </span>start.time) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">print</span>() <span class="co">#time elapsed </span></a></code></pre></div>
-<pre><code>## Time difference of 0 secs</code></pre>
+<pre><code>## Time difference of 0.002997875 secs</code></pre>
 <div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb64-1" data-line-number="1"><span class="co"># Speed of %chin%</span></a>
 <a class="sourceLine" id="cb64-2" data-line-number="2">start.time &lt;-<span class="st"> </span><span class="kw">Sys.time</span>() <span class="co">#start clock</span></a>
 <a class="sourceLine" id="cb64-3" data-line-number="3">state.abb <span class="op">%&lt;&gt;%</span><span class="st"> </span>.[. <span class="op">%chin%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;OR&quot;</span>,<span class="st">&quot;CA&quot;</span>)] </a>
 <a class="sourceLine" id="cb64-4" data-line-number="4">(<span class="kw">Sys.time</span>() <span class="op">-</span><span class="st"> </span>start.time) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">print</span>() <span class="co">#time elapsed </span></a></code></pre></div>
-<pre><code>## Time difference of 0.015625 secs</code></pre>
+<pre><code>## Time difference of 0.004997015 secs</code></pre>
 <p><code>%between%</code> finds numbers between two values.</p>
 <div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb66-1" data-line-number="1">x20 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">20</span>)</a>
 <a class="sourceLine" id="cb66-2" data-line-number="2">x20 <span class="op">%between%</span><span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">10</span>)</a></code></pre></div>
@@ -3340,17 +3340,17 @@ div.tocify {
 ## $ gdpPercap &lt;dbl&gt; 779.4453, 820.8530, 853.1007, 836.1971, 739.9811, 78...</code></pre>
 <div class="sourceCode" id="cb132"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb132-1" data-line-number="1"><span class="co"># Print random sample of 10 rows </span></a>
 <a class="sourceLine" id="cb132-2" data-line-number="2">gapminder <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sample_n</span>(<span class="dt">size=</span><span class="dv">10</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">print.data.frame</span>()</a></code></pre></div>
-<pre><code>##                     country continent year lifeExp      pop  gdpPercap
-## 1                 Singapore      Asia 2002  78.770  4197776 36023.1054
-## 2                   Myanmar      Asia 1992  59.320 40546538   347.0000
-## 3                   Myanmar      Asia 1962  45.108 23634436   388.0000
-## 4                   Belgium    Europe 1972  71.440  9709100 16672.1436
-## 5                     Sudan    Africa 2002  56.369 37090298  1993.3983
-## 6                   Iceland    Europe 1977  76.110   221823 19654.9625
-## 7  Central African Republic    Africa 2002  43.308  4048013   738.6906
-## 8               Congo, Rep.    Africa 1982  56.695  1774735  4879.5075
-## 9                   Hungary    Europe 1957  66.410  9839000  6040.1800
-## 10                Swaziland    Africa 2007  39.613  1133066  4513.4806</code></pre>
+<pre><code>##        country continent year lifeExp      pop  gdpPercap
+## 1     Malaysia      Asia 2002  73.044 22662365 10206.9779
+## 2      Vietnam      Asia 1977  55.764 50533506   713.5371
+## 3      Jamaica  Americas 1992  71.766  2378618  7404.9237
+## 4      Senegal    Africa 1997  60.187  9535314  1392.3683
+## 5   Madagascar    Africa 2007  59.443 19167654  1044.7701
+## 6      Somalia    Africa 2002  45.936  7753310   882.0818
+## 7  Netherlands    Europe 1992  77.420 15174244 26790.9496
+## 8       Greece    Europe 1952  65.860  7733250  3530.6901
+## 9      Bahrain      Asia 1962  56.923   171863 12753.2751
+## 10 Korea, Rep.      Asia 1972  62.612 33505000  3030.8767</code></pre>
 <div id="subset-columns" class="section level3">
 <h3>5.1. Subset Columns</h3>
 <p><code>select()</code> function:</p>
@@ -3456,7 +3456,7 @@ div.tocify {
 </div>
 </div>
 <div id="unique-rows" class="section level3">
-<h3>Unique rows</h3>
+<h3>5.4. Unique rows</h3>
 <p><code>distinct</code> removes all duplicate rows.</p>
 <div class="sourceCode" id="cb146"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb146-1" data-line-number="1"><span class="co"># No duplicate rows</span></a>
 <a class="sourceLine" id="cb146-2" data-line-number="2">gapminder <span class="op">%&gt;%</span><span class="st"> </span>nrow</a></code></pre></div>
@@ -3472,7 +3472,7 @@ div.tocify {
 </div>
 </div>
 <div id="exercises-2" class="section level3 tabset">
-<h3>5.4. Exercises</h3>
+<h3>5.5. Exercises</h3>
 <div id="questions" class="section level4">
 <h4>Questions</h4>
 <p>Remember to use good commenting practices!</p>
