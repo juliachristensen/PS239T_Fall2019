@@ -507,6 +507,18 @@ while(i <= length(fruits)){
 }
 ```
 
+## 4.1. Exercises
+
+The following exercises are adapted from https://www.r-exercises.com/2018/01/22/stringr-basic-functions-exercises/. 
+
+### Questions
+
+1. Write a for loop that iterates over the numbers 1 to 7 and prints the cube of each number. 
+```{r}
+
+```
+
+
 
 **********************************************************
 
