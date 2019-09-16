@@ -1,0 +1,1298 @@
+---
+title: "Untitled"
+author: "Julia Christensen"
+date: "February 13, 2019"
+output: html_document
+---
+
+***************************************************
+# 1) SET UP 
+
+## 1.1. General Set Up 
+```{r}
+### Clear global environment
+rm(list=ls()) 
+
+### Download Libraries 
+library(pacman)
+p_load(tidyverse, data.table, rmarkdown, knitr, tinytex, magrittr,
+       Matrix,
+       haven,
+       sjmisc, #for adding dummies (https://stackoverflow.com/questions/49276914/mutating-dummy-variables-in-dplyr)
+       Matching, permute, car, sandwich, 
+       lfe, AER, ivmodel, # Added for 2SLS
+       estimatr, purrr,
+       rlist,
+       stargazer, xtable,
+       viridis
+       )
+
+# install.packages("haven")
+# library(haven)
+
+### Set file paths
+# source("../Set_Up/file_paths.R")
+
+### Download visualisation formatting
+source("../Set_Up/visualisation.R")
+
+### Download functions
+source("../Functions/fun_peng_iv.R")
+source("../Functions/fun_iv_analysis.R")
+
+```
+
+
+## 1.2 Load Data
+```{r, eval=FALSE}
+# Clear global environment (NOT functions & ggplot theme)
+rm(list=setdiff(ls(), c(lsf.str(), "theme_ed"))) 
+
+# Select data
+agg_lvl  <- "cz"
+dis_type <- "f"
+fema_sub <- FALSE
+
+if(dis_type=="f") dis_name <- "flood"
+if(dis_type=="t") dis_name <- "tornado"
+
+# Download data
+if(fema_sub==TRUE){
+  dat <- load_clean_fun(agg_lvl = agg_lvl, dis_type = dis_type, 
+                        fp=paste0("../Data/storm_",dis_type,"_1to1_",agg_lvl,"_merged.RData"))
+} else{
+  dat <- load_clean_fun(agg_lvl = agg_lvl, dis_type = dis_type, 
+                        fp=paste0("../Data/storm_1to1_",agg_lvl,"_merged.RData"))
+}
+
+# Make Z Binary 
+# dat%<>% mutate_at(vars(contains("np_event")), funs(ifelse(.>0,1,0)))
+
+# Add totals if cz
+if(agg_lvl=="cz"){
+  dat %<>% mutate(deaths_total   = DEATHS_DIRECT_num + DEATHS_INDIRECT_num,
+                  injuries_total = INJURIES_DIRECT_num + INJURIES_INDIRECT_num)
+}
+```
+
+***************************************************
+# (2) ANALYSIS
+
+Comparisons to run:
+- All FEMA disasters (match_fema) vs. flood/tornado disasers (match_fema_f/t)
+- NYT hits with state vs. cz search criteria 
+- Binary vs. continuous z
+- np vs np_event 
+- np_event subtypes
+- Length of lead period 
+- No X vs. FE only vs. X 
+- FE
+  * no FE
+  * state vs. cz
+  * m, y vs m-y
+  * m-y-geo
+
+Analysis:
+- Lin's estimator 
+- Confirm Lin's estimator = 2SLS results 
+- Fieller-Anderson-Rubin confidence interval
+- Fisher randomization 
+
+
+```{r, eval=FALSE}
+hist(dat$days_of_disaster)
+hist(dat$deaths_total)
+hist(dat$injuries_total)
+
+hist(dat$nyt_hit_flag_st_b4decl_sub)
+hist(dat$nyt_hits_total_st_b4decl_sub)
+
+hist(dat$np_event_sum_b4decl_sub)
+
+hist(dat$np_event_lead60)
+
+hist(dat$match_fema_sub)
+
+dat %<>% mutate(days_b4_decl = as.numeric(date_declaration_sub - new_date_beg))
+
+dat %>% dplyr::select(days_b4_decl) %>% head(50) %>% t()
+
+dat$np_event_sum_b4decl %>% is.na() %>% sum()
+
+dat %>% 
+  filter(days_b4_decl > -10 & days_b4_decl < 100) %>% 
+  dplyr::select(days_b4_decl) %>%
+  mutate(days_b4_decl = as.numeric(days_b4_decl) ) %>% 
+  .$days_b4_decl %>% hist()
+
+hist(dat$days_b4_decl)
+
+
+dat %>%
+  mutate(flag1 = ifelse(np_event_sum_b4decl >0, 1, 0),
+         flag2 = ifelse(nyt_hits_total_st_b4decl >0, 1, 0),
+         flag3 = ifelse(flag1==1 & flag2==1, 1, 0)) %>%
+  summarise(pct_np = mean(flag1),
+            pct_nyt = mean(flag2),
+            pct_np_nyt = mean(flag3))
+
+hist(dat$np_event_lead60)
+
+```
+
+
+## 2.1. Functions 
+
+### 2.1.0. Load Data 
+```{r}
+load_dat_for_analysis <- function(agg_lvl, dis_type = "f"){
+  # Set options
+    if(dis_type=="f") dis_name <- "flood"
+    if(dis_type=="t") dis_name <- "tornado"
+  # Download data
+    dat <- load_clean_fun(agg_lvl = agg_lvl, dis_type = dis_type) 
+  # Add totals if cz
+    if(agg_lvl=="cz"){
+      dat %<>% mutate(deaths_total   = DEATHS_DIRECT_num + DEATHS_INDIRECT_num,
+                      injuries_total = INJURIES_DIRECT_num + INJURIES_INDIRECT_num)
+    }
+  return(dat)
+}
+```
+
+### 2.1.1. Load Data (1to1)
+```{r}
+load_dat_for_analysis_1to1 <- function(fema_sub, agg_lvl, dis_type = "f"){
+  # Set options
+    if(dis_type=="f") dis_name <- "flood"
+    if(dis_type=="t") dis_name <- "tornado"
+  # Download data
+    if(fema_sub==TRUE){
+      dat <- load_clean_fun(agg_lvl = agg_lvl, dis_type = dis_type, 
+                            fp=paste0("../Data/storm_",dis_type,"_1to1_",agg_lvl,"_merged.RData"))
+    } else{
+      dat <- load_clean_fun(agg_lvl = agg_lvl, dis_type = dis_type, 
+                            fp=paste0("../Data/storm_1to1_",agg_lvl,"_merged.RData"))
+    }    
+  # Add totals if cz
+    if(agg_lvl=="cz"){
+      dat %<>% mutate(deaths_total   = DEATHS_DIRECT_num + DEATHS_INDIRECT_num,
+                      injuries_total = INJURIES_DIRECT_num + INJURIES_INDIRECT_num)
+    }
+  return(dat)
+}
+```
+
+### 2.1.2. Gen lists for latex table
+```{r}
+### Gen SE for Table
+# Single calc
+  calc_single_se <- function(res)
+  {
+    # Save coefficient table & col names
+      b_tbl <- res %>% summary(robust=TRUE) %>% coef()
+      b_cols <- b_tbl %>% colnames()
+    # Return SE
+      if("Robust s.e" %in% b_cols) res_se <- b_tbl %>% .[,"Robust s.e"]
+      if("Cluster s.e." %in% b_cols) res_se <- b_tbl %>% .[,"Cluster s.e."]
+    return(res_se)  
+  }
+# Whole vector
+  calc_se_vec <- function(res_list) map(res_list, calc_single_se)
+```
+
+```{r}
+### Gen 1st Stage Coef (tauD)
+# Single calc
+  calc_single_td <- function(res, z, rnd=3)
+  {
+    res$stage1$coefficients[z,1] %>% round(rnd)
+  }
+# Whole vector
+  calc_td_vec <- function(res_list, z, rnd=3)
+  {
+    map(res_list, calc_single_td, z=z, rnd=rnd) %>% unlist() %>% 
+      unlist() %>% unname() %>%
+      round(rnd)
+  }
+```
+
+```{r}
+### Gen tauY
+# Single calc
+  calc_single_ty <- function(res, z, d, rnd=3)
+  {
+    # Store final 2SLS beta for D
+      d_txt <- paste0("`",d,"(fit)`")
+      b <- res$coefficients[d_txt,]
+    # Store 1st stage (tauD)  
+      td <- calc_single_td(res, z)
+    # Calc tauY
+      b*td %>% round(rnd)
+  }
+# Whole vector
+  calc_ty_vec <- function(res_list, z, d, rnd=3) 
+  {
+    map(res_list, calc_single_ty, z=z, d=d, rnd=rnd) %>% 
+      unlist() %>% unname() %>%
+      round(rnd)
+  }
+```
+
+### 2.1.3. Weak IV Tests  
+```{r}
+### F-stat from 1st stage 
+# Single calc
+  get_s1_fstat_felm <- function(res, rnd=3, robust=TRUE)
+  {
+    # Get robust 
+      if(robust==TRUE) f <- res$stage1$rob.iv1fstat[[1]]['F'] %>% round(rnd)
+    # Get regular 
+      if(robust==FALSE) f <- res$stage1$iv1fstat[[1]]['F'] %>% round(rnd)    
+    # Return
+      return(f)  
+  }
+# Whole vector
+  get_s1_fstat_vec <- function(res_list, rnd=3, robust=TRUE) 
+  {
+    map(res_list, get_s1_fstat_felm, rnd=rnd, robust=robust) %>% 
+      unlist() %>% unname() %>%
+      round(rnd)
+  }
+```
+Note: when there are multiple z values, a classic weak IV wald test does not equal the value from felm (see https://www.r-bloggers.com/detecting-weak-instruments-in-r/ for classic test). However, when there is only one z variable, the two methods seem to agree. Because lm() won't run for the FE models, I only tested this for the model with X and no FE. 
+```{r, eval=FALSE}
+### Testing 
+# do regressions for partial F-tests
+# first-stage:
+lm_txt <- as.formula(paste0(d_txt," ~ 1 + ",X_txt,"+",z_txt)) %>% print()
+fs = lm(lm_txt, data = dat)
+# null first-stage (i.e. exclude IVs):
+lm_txt_noIV <- as.formula(paste0(d_txt," ~ 1 + ",X_txt)) %>% print()
+fn = lm(lm_txt_noIV, data = dat)
+
+# simple F-test
+waldtest(fs, fn)$F[2]
+print("compare to felm")
+get_s1_fstat_felm(lm2, robust=FALSE)
+
+# F-test robust to heteroskedasticity
+waldtest(fs, fn, vcov = vcovHC(fs, type="HC0"))$F[2]
+print("compare to felm")
+get_s1_fstat_felm(lm2, robust=TRUE)
+lm2 %>% condfstat(type="robust")
+
+sapply(lm2$stage1$lhs, function(lh) lfe::waldtest(lm2$stage1, ~np_olympics_lead20|np_sport_lead20|np_death_lead20, lhs=lh)) %>% t()
+
+sapply(lm2$stage1$lhs, function(lh) lfe::waldtest(lm2$stage1, ~np_olympics_lead20|np_sport_lead20|np_death_lead20, lhs=lh, type="robust", r=0)) %>% t()
+
+paste0("~",paste(p[["z"]], collapse="|"))
+```
+
+Compute conditional F statistic for weak instruments in an IV-estimation with multiple endogenous variables using lfe::condfstat(). Based on Sanderson, E. and F. Windmeijer (2014) A weak instrument F-test in linear IV models with multiple endogenous variables, Journal of Econometrics, 2015. http://www.sciencedirect.com/science/article/pii/S0304407615001736.
+```{r}
+### lfe::condfstat()
+# Single calc
+  get_s1_condfstat_felm <- function(res, rnd=3, robust=TRUE)
+  {
+    # Get robust 
+      if(robust==TRUE) f <- res %>% condfstat(type="robust")
+    # Get regular 
+      if(robust==FALSE) f <- res %>% condfstat(type="iid")
+    # Return
+      return(f)  
+  }
+# Whole vector
+  get_s1_condfstat_vec <- function(res_list, rnd=3, robust=TRUE) 
+  {
+    map(res_list, get_s1_condfstat_felm, rnd=rnd, robust=robust) %>% 
+      unlist() %>% unname() %>%
+      round(rnd)
+  }
+# Note: May want to add quantiles in future 
+# condfstat(est, quantiles=c(0.05, 0.95))
+```
+
+### 2.1.4. Gen Reg Results
+```{r}
+gen_general_table_contents <- function(p)
+{
+  # IV Only (1)
+    lm1 <- p[["dat"]] %>% 
+      run_tsls_fun(y = p[["y"]], z = p[["z"]], d = p[["d"]],
+                   x_vars  = NULL,
+                   geo_fe  = NULL,
+                   time_fe = NULL )
+  # Add FE (3)
+    lm3 <- dat %>% 
+      run_tsls_fun(y = p[["y"]], z = p[["z"]], d = p[["d"]],
+                   x_vars  = NULL,
+                   geo_fe  = p[["geo_fe"]],
+                   time_fe = p[["time_fe"]])
+  # Add X (2)
+    lm2 <- dat %>%
+      run_tsls_fun(y = p[["y"]], z = p[["z"]], d = p[["d"]],
+                   x_vars  = p[["x_vars"]],
+                   geo_fe  = NULL,
+                   time_fe = NULL)  
+  # Add FE + X (5)
+    lm5 <- dat %>%
+      run_tsls_fun(y = p[["y"]], z = p[["z"]], d = p[["d"]],
+                   x_vars  = p[["x_vars"]],
+                   geo_fe  = p[["geo_fe"]],
+                   time_fe = p[["time_fe"]])
+  # Add FE + X + Clustering (7)
+    lm7 <- dat %>%
+      run_tsls_fun(y = p[["y"]], z = p[["z"]], d = p[["d"]],
+                   x_vars  = p[["x_vars"]],
+                   geo_fe  = p[["geo_fe"]],
+                   time_fe = p[["time_fe"]],
+                   cluster_var = p[["cluster_var"]]) 
+    
+  return(list("lm1"=lm1, "lm2"=lm3, "lm3"=lm2, "lm4"=lm5, "lm5"=lm7))
+}
+```
+
+### 2.1.5. Gen Table
+```{r}
+gen_general_table <- function(p, output_type="text")
+{
+  # Generate IV results  
+    res_list <- gen_general_table_contents(p)
+  # Track model choices
+    extra_lines <- list(c("Covariates",  "", "", "X", "X", "X"),
+                        c("Time FE",     "", "X", "", "X", "X"), 
+                        c("Geo FE",      "", "X", "", "X", "X"),
+                        c("Cluster SE",  "", "", "", "", "X")
+                        )
+  # Add tauD and tauY if only one var in model  
+    if(length(p[["z"]])==1){
+      extra_lines <- c(extra_lines,
+                       list(c("tauD", calc_td_vec(res_list, p[["z"]]))),
+                       list(c("tauY", calc_ty_vec(res_list, p[["z"]], p[["d"]]))),
+                       # list(c("Stage1 F", get_s1_fstat_vec(res_list, robust=FALSE))),
+                       list(c("Stage1 F (robust)", get_s1_fstat_vec(res_list, robust=TRUE))),
+                       # list(c("Stage1 Conditional F", get_s1_condfstat_vec(res_list, robust=FALSE))),
+                       list(c("Stage1 Conditional F (robust)", get_s1_condfstat_vec(res_list, robust=TRUE))))
+    } else{
+      extra_lines <- c(extra_lines,
+                       # list(c("Stage1 F", get_s1_fstat_vec(res_list, robust=FALSE))),
+                       list(c("Stage1 F (robust)", get_s1_fstat_vec(res_list, robust=TRUE))),
+                       # list(c("Stage1 Conditional F", get_s1_condfstat_vec(res_list, robust=FALSE))),
+                       list(c("Stage1 Conditional F (robust)", get_s1_condfstat_vec(res_list, robust=TRUE))))
+    }
+  # Generate latex table 
+    stargazer(
+      # Ordered list of results 
+        res_list,
+      # Add robust SE 
+        se=map(res_list, calc_single_se),
+      # Show the number of observations
+        nobs=TRUE,
+      # Add X+D labels 
+        covariate.labels = c("Disaster Length","Deaths","Injuries","News Coverage"),
+      # Standardize column labels   
+        column.labels = as.character(c(1:5)),
+      # Don't seperate columns(?) 
+        column.separate = NULL,
+      # Label Y
+        dep.var.labels = rep("Aid",5),
+      # Add lines with 1st Stage, FE and Cluster Options 
+        add.lines=extra_lines,
+      # Specify output type (latex for final table)
+        type=output_type,
+      # Omit statistics 
+        omit.stat=c("ser", "adj.rsq", "rsq"),
+      # Add notes
+        notes.append = TRUE,
+        notes=c("The Stage1 F test and Stage1 Conditional F test are weak","instrument tests reported by the felm() function in R.")
+    )
+}
+
+# p <- list("dat"    = dat,
+#           "y"        = "match_fema_b0",
+#           "z"        = c("np_event_lead20"),
+#           "d"        = "nyt_hit_flag_lead20_st",
+#           "x_vars"   = c("days_of_disaster","deaths_total","injuries_total"),
+#           "geo_fe"   = c("STATE_FIPS_2", "FIPS"),
+#           "time_fe"  = c("year", "month"),
+#           "cluster_var" = c("Date", "STATE_FIPS_2"))
+# 
+# gen_general_table(p)
+# 
+# 
+# p <- list("dat"    = dat,
+#           "y"        = "match_fema_b0",
+#           "z"        = c("np_olympics_lead20","np_sport_lead20","np_death_lead20"),
+#           "d"        = "nyt_hit_flag_lead20_st",
+#           "x_vars"   = c("days_of_disaster","deaths_total","injuries_total"),
+#           "geo_fe"   = c("STATE_FIPS_2", "FIPS"),
+#           "time_fe"  = c("year", "month"),
+#           "cluster_var" = c("Date", "STATE_FIPS_2"))
+# gen_general_table(p)
+```
+
+### 2.1.6. Gen S1 Table (stage 1)
+```{r}
+gen_general_stage1_table <- function(p, output_type="text", z_labels=c("News Pressure"))
+{
+  # Generate IV results
+    res_list <- gen_general_table_contents(p)
+  # Extract stage1 regression results  
+    res_list <- lapply(res_list, function(x) x$stage1)
+  # Generate latex table 
+    stargazer(
+      # Ordered list of results 
+        res_list,
+      # Add robust SE 
+        se=map(res_list, calc_single_se),
+      # Show the number of observations
+        nobs=TRUE,
+      # Add X+Z labels 
+        covariate.labels = c("Disaster Length","Deaths","Injuries",z_labels),
+      # Standardize column labels   
+        column.labels = as.character(c(1:5)),
+      # Don't seperate columns(?) 
+        column.separate = NULL,
+      # Label Y
+        dep.var.labels = rep("News Coverage",5),
+      # Add lines with 1st Stage, FE and Cluster Options 
+        add.lines=
+          list(c("Covariates",  "", "", "X", "X", "X"),
+               c("Time FE",     "", "X", "", "X", "X"), 
+               c("Geo FE",      "", "X", "", "X", "X"),
+               c("Cluster SE",  "", "", "", "", "X")),
+      # Specify output type (latex for final table)
+        type=output_type,
+      # Omit statistics 
+        omit.stat=c("ser")      
+    )
+}
+
+# p <- list("dat"    = dat,
+#           "y"        = "match_fema_b0",
+#           "z"        = c("np_olympics_lead20","np_sport_lead20","np_death_lead20"),
+#           "d"        = "nyt_hit_flag_lead20_st",
+#           "x_vars"   = c("days_of_disaster","deaths_total","injuries_total"),
+#           "geo_fe"   = c("STATE_FIPS_2", "FIPS"),
+#           "time_fe"  = c("year", "month"),
+#           "cluster_var" = c("Date", "STATE_FIPS_2"))
+# 
+# gen_general_stage1_table(p, z_labels=c("Olympics", "Sports", "Deaths"))
+
+```
+
+### 2.1.7. Gen Y~D Reg Results
+```{r}
+gen_general_table_contents_YonD <- function(p)
+{
+  # IV Only (1)
+    lm1 <- p[["dat"]] %>% 
+      run_YonD_fun(y = p[["y"]], z = p[["z"]], d = p[["d"]],
+                   x_vars  = NULL,
+                   geo_fe  = NULL,
+                   time_fe = NULL )
+  # Add FE (3)
+    lm3 <- dat %>% 
+      run_YonD_fun(y = p[["y"]], z = p[["z"]], d = p[["d"]],
+                   x_vars  = NULL,
+                   geo_fe  = p[["geo_fe"]],
+                   time_fe = p[["time_fe"]])
+  # Add X (2)
+    lm2 <- dat %>%
+      run_YonD_fun(y = p[["y"]], z = p[["z"]], d = p[["d"]],
+                   x_vars  = p[["x_vars"]],
+                   geo_fe  = NULL,
+                   time_fe = NULL)  
+  # Add FE + X (5)
+    lm5 <- dat %>%
+      run_YonD_fun(y = p[["y"]], z = p[["z"]], d = p[["d"]],
+                   x_vars  = p[["x_vars"]],
+                   geo_fe  = p[["geo_fe"]],
+                   time_fe = p[["time_fe"]])
+  # Add FE + X + Clustering (7)
+    lm7 <- dat %>%
+      run_YonD_fun(y = p[["y"]], z = p[["z"]], d = p[["d"]],
+                   x_vars  = p[["x_vars"]],
+                   geo_fe  = p[["geo_fe"]],
+                   time_fe = p[["time_fe"]],
+                   cluster_var = p[["cluster_var"]]) 
+    
+  return(list("lm1"=lm1, "lm2"=lm3, "lm3"=lm2, "lm4"=lm5, "lm5"=lm7))
+}
+```
+
+### 2.1.7. Gen Y~Z Reg Results
+```{r}
+gen_general_table_contents_YonZ <- function(p)
+{
+  # IV Only (1)
+    lm1 <- p[["dat"]] %>% 
+      run_YonZ_fun(y = p[["y"]], z = p[["z"]], d = p[["d"]],
+                   x_vars  = NULL,
+                   geo_fe  = NULL,
+                   time_fe = NULL )
+  # Add FE (3)
+    lm3 <- dat %>% 
+      run_YonZ_fun(y = p[["y"]], z = p[["z"]], d = p[["d"]],
+                   x_vars  = NULL,
+                   geo_fe  = p[["geo_fe"]],
+                   time_fe = p[["time_fe"]])
+  # Add X (2)
+    lm2 <- dat %>%
+      run_YonZ_fun(y = p[["y"]], z = p[["z"]], d = p[["d"]],
+                   x_vars  = p[["x_vars"]],
+                   geo_fe  = NULL,
+                   time_fe = NULL)  
+  # Add FE + X (5)
+    lm5 <- dat %>%
+      run_YonZ_fun(y = p[["y"]], z = p[["z"]], d = p[["d"]],
+                   x_vars  = p[["x_vars"]],
+                   geo_fe  = p[["geo_fe"]],
+                   time_fe = p[["time_fe"]])
+  # Add FE + X + Clustering (7)
+    lm7 <- dat %>%
+      run_YonZ_fun(y = p[["y"]], z = p[["z"]], d = p[["d"]],
+                   x_vars  = p[["x_vars"]],
+                   geo_fe  = p[["geo_fe"]],
+                   time_fe = p[["time_fe"]],
+                   cluster_var = p[["cluster_var"]]) 
+    
+  return(list("lm1"=lm1, "lm2"=lm3, "lm3"=lm2, "lm4"=lm5, "lm5"=lm7))
+}
+```
+
+### 2.1.8. Gen Y~D Table
+```{r}
+gen_general_YonD_table <- function(p, output_type="text", d_labels=c("News Coverage"))
+{
+  # Generate IV results
+    res_list <- gen_general_table_contents_YonD(p)
+  # Generate latex table 
+    stargazer(
+      # Ordered list of results 
+        res_list,
+      # Add robust SE 
+        se=map(res_list, calc_single_se),
+      # Show the number of observations
+        nobs=TRUE,
+      # Add X+Z labels 
+        covariate.labels = c("Disaster Length","Deaths","Injuries",d_labels),
+      # Standardize column labels   
+        column.labels = as.character(c(1:5)),
+      # Don't seperate columns(?) 
+        column.separate = NULL,
+      # Label Y
+        dep.var.labels = rep("Aid",5),
+      # Add lines with 1st Stage, FE and Cluster Options 
+        add.lines=
+          list(c("Covariates",  "", "", "X", "X", "X"),
+               c("Time FE",     "", "X", "", "X", "X"), 
+               c("Geo FE",      "", "X", "", "X", "X"),
+               c("Cluster SE",  "", "", "", "", "X")),
+      # Specify output type (latex for final table)
+        type=output_type,
+      # Omit statistics 
+        omit.stat=c("ser")      
+    )
+}
+```
+
+### 2.1.8. Gen Y~Z Table
+```{r}
+gen_general_YonZ_table <- function(p, output_type="text", z_labels=c("News Pressure"))
+{
+  # Generate IV results
+    res_list <- gen_general_table_contents_YonZ(p)
+  # Generate latex table 
+    stargazer(
+      # Ordered list of results 
+        res_list,
+      # Add robust SE 
+        se=map(res_list, calc_single_se),
+      # Show the number of observations
+        nobs=TRUE,
+      # Add X+Z labels 
+        covariate.labels = c("Disaster Length","Deaths","Injuries",z_labels),
+      # Standardize column labels   
+        column.labels = as.character(c(1:5)),
+      # Don't seperate columns(?) 
+        column.separate = NULL,
+      # Label Y
+        dep.var.labels = rep("Aid",5),
+      # Add lines with 1st Stage, FE and Cluster Options 
+        add.lines=
+          list(c("Covariates",  "", "", "X", "X", "X"),
+               c("Time FE",     "", "X", "", "X", "X"), 
+               c("Geo FE",      "", "X", "", "X", "X"),
+               c("Cluster SE",  "", "", "", "", "X")),
+      # Specify output type (latex for final table)
+        type=output_type,
+      # Omit statistics 
+        omit.stat=c("ser")      
+    )
+}
+```
+
+
+### 2.1.9. Generate Inputs for Main Model (w/ lead Z and D vars)
+```{r}
+gen_inputs_wlead <- function(dat, lead_period, agg_lvl,
+                             d_stems = "nyt_hits_total", #nyt_hits_total, nyt_hit_flag
+                             fema_buffer = 0,
+                             fema_sub = FALSE,
+                             z_stems = "np_event",                       
+                             subset_by_severity = FALSE,
+                             nyt_agg="st",
+                             binary_z_override = NULL, #by default is binary when D is binary
+                             cont_zd_avg = FALSE #make D and Z avg over lead period
+                             )
+{
+  # Generate variable names
+    # FE
+      if(agg_lvl=="st") geo_fe <- c("STATE_FIPS_2")
+      if(agg_lvl=="cz") geo_fe <- c("STATE_FIPS_2", "FIPS")
+      time_fe <- c("year", "month") 
+    # Cluster
+      cluster_var <- c("Date", "STATE_FIPS_2")
+    # X
+      x_vars <- c("days_of_disaster","deaths_total","injuries_total")      
+    # Y
+      if(fema_sub==FALSE) y <- paste0("match_fema_b",fema_buffer)
+      if(fema_sub==TRUE)  y <- paste0("match_fema_d_b",fema_buffer)
+    # Z
+      if(cont_zd_avg==TRUE) dat %<>% mutate_at(vars(contains("np_event")), funs(./lead_period))
+      z <- paste0(z_stems,"_lead",lead_period)
+      if(d_stems=="nyt_hit_flag") binary_z <- TRUE
+      if(d_stems!="nyt_hit_flag") binary_z <- FALSE
+      if(!is.null(binary_z_override)) binary_z <- binary_z_override
+      if(binary_z==TRUE) dat %<>% mutate_at(vars(contains("np_event")), funs(ifelse(.>0,1,0)))
+    # D
+      if(cont_zd_avg==TRUE) dat %<>% mutate_at(vars(contains("nyt_hit")), funs(./lead_period))
+      d <- paste0(d_stems,"_lead",lead_period,"_",nyt_agg)
+  # Subset by severity?
+    if(subset_by_severity==TRUE){
+      dat %<>%
+        filter(deaths_total < 5) %>% #FOLLOW UP: make sure these cutoffs make sense
+        filter(injuries_total < 100)
+    }    
+  return(list("dat" = dat,
+              "y" = y,
+              "d" = d,
+              "z" = z,
+              "x_vars" = x_vars,
+              "geo_fe" = geo_fe,
+              "time_fe" = time_fe,
+              "cluster_var" = cluster_var))
+}
+```
+
+### 2.1.10. Generate Inputs for 1to1
+```{r}
+gen_inputs_1to1 <- function(dat, lead_period, agg_lvl,
+                            d_stems = "nyt_hits_total", #nyt_hits_total, nyt_hit_flag
+                            fema_sub = FALSE,
+                            z_stems = "np_event",                       
+                            subset_by_severity = FALSE,
+                            nyt_agg="st",
+                            binary_z_override = NULL, #by default is binary when D is binary
+                            cont_zd_avg = FALSE #make D and Z avg over lead period
+                            )
+{
+  # Generate variable names
+    # FE
+      if(agg_lvl=="st") geo_fe <- c("STATE_FIPS_2")
+      if(agg_lvl=="cz") geo_fe <- c("STATE_FIPS_2", "FIPS")
+      time_fe <- c("year", "month") 
+    # Cluster
+      cluster_var <- c("Date", "STATE_FIPS_2")
+    # X
+      x_vars <- c("days_of_disaster","deaths_total","injuries_total")      
+    # Y
+      if(fema_sub==TRUE) y <- "match_fema_sub"
+      if(fema_sub==FALSE) y <- "match_fema"  
+    # Z
+      if(cont_zd_avg==TRUE) dat %<>% mutate_at(vars(contains("np_event")), funs(./lead_period))
+      z <- paste0(z_stems,"_lead",lead_period)
+      if(d_stems=="nyt_hit_flag") binary_z <- TRUE
+      if(d_stems!="nyt_hit_flag") binary_z <- FALSE
+      if(!is.null(binary_z_override)) binary_z <- binary_z_override
+      if(binary_z==TRUE) dat %<>% mutate_at(vars(contains("np_event")), funs(ifelse(.>0,1,0)))
+    # D
+      if(cont_zd_avg==TRUE) dat %<>% mutate_at(vars(contains("nyt_hit")), funs(./lead_period))
+      d <- paste0(d_stems,"_lead",lead_period,"_",nyt_agg)
+  # Subset dat based on lead period 
+    if(fema_sub==TRUE){
+      dat %<>%
+        # Create var with days before declaration 
+          mutate(days_b4_decl = as.numeric(date_declaration_sub - new_date_beg)) %>%
+        # Remove rows with declaration dates before the end of the selected lead period
+          filter((match_fema_sub==1 & days_b4_decl > lead_period) | (match_fema_sub==0))
+    } else{
+      dat %<>%
+        # Create var with days before declaration 
+          mutate(days_b4_decl = as.numeric(date_declaration - new_date_beg)) %>%
+        # Remove rows with declaration dates before the end of the selected lead period
+          filter((match_fema==1 & days_b4_decl > lead_period) | (match_fema==0))
+    }
+  # Subset by severity?
+    if(subset_by_severity==TRUE){
+      dat %<>%
+        filter(deaths_total < 5) %>% #FOLLOW UP: make sure these cutoffs make sense
+        filter(injuries_total < 100)
+    }    
+  return(list("dat" = dat,
+              "y" = y,
+              "d" = d,
+              "z" = z,
+              "x_vars" = x_vars,
+              "geo_fe" = geo_fe,
+              "time_fe" = time_fe,
+              "cluster_var" = cluster_var))
+}
+```
+
+
+### 2.1.11. Gen Table for Main Model (w/ lead Z and D vars)
+```{r}
+gen_table_wlead <- function(dat, lead_period, agg_lvl,
+                            d_stems = "nyt_hits_total", #nyt_hits_total, nyt_hit_flag
+                            fema_buffer = 0,
+                            fema_sub = FALSE,
+                            z_stems = "np_event",                       
+                            subset_by_severity = FALSE,
+                            nyt_agg="st",
+                            binary_z_override = NULL,
+                            cont_zd_avg = FALSE, #make D and Z avg over lead period
+                            output_type="text")
+{
+  # Generate inputs
+    p <- dat %>% gen_inputs_wlead(lead_period=lead_period, agg_lvl=agg_lvl,
+                                  d_stems=d_stems, fema_buffer=fema_buffer,
+                                  fema_sub=fema_sub, z_stems=z_stems,
+                                  subset_by_severity=subset_by_severity,
+                                  nyt_agg=nyt_agg,binary_z_override=binary_z_override,
+                                  cont_zd_avg=cont_zd_avg)
+  # Generate table   
+    p %>% gen_general_table(output_type=output_type)
+}
+
+```
+
+### 2.1.12. Gen Table for 1to1
+```{r}
+gen_table_1to1 <- function(dat, lead_period, agg_lvl,
+                           d_stems = "nyt_hits_total", #nyt_hits_total, nyt_hit_flag
+                           fema_sub = FALSE,
+                           z_stems = "np_event",                       
+                           subset_by_severity = FALSE,
+                           nyt_agg="st",
+                           binary_z_override = NULL,
+                           cont_zd_avg = FALSE, #make D and Z avg over lead period
+                           output_type="text")
+{
+  # Generate inputs
+    p <- dat %>% gen_inputs_1to1(lead_period=lead_period, agg_lvl=agg_lvl,
+                                  d_stems=d_stems, 
+                                  fema_sub=fema_sub, z_stems=z_stems,
+                                  subset_by_severity=subset_by_severity,
+                                  nyt_agg=nyt_agg,binary_z_override=binary_z_override,
+                                 cont_zd_avg=cont_zd_avg)
+  # Generate table   
+    p %>% gen_general_table(output_type=output_type)
+}
+
+# agg_lvl = "cz" 
+# fema_sub <- TRUE
+# dat <- load_dat_for_analysis_1to1(agg_lvl=agg_lvl, fema_sub=fema_sub)
+# 
+# gen_table_1to1(dat, agg_lvl=agg_lvl,
+#                 lead_period=10, 
+#                 fema_sub = fema_sub,
+#                 d_stems = "nyt_hits_total",
+#                 z_stems = "np_event")
+# 
+# gen_inputs_1to1(dat, agg_lvl=agg_lvl,
+#                 lead_period=10, 
+#                 fema_sub = fema_sub,
+#                 d_stems = "nyt_hits_total",
+#                 z_stems = "np_event") %>%
+#   gen_general_YonD_table()
+
+```
+
+
+## 2.2. Compare: Main Model (w/ lead Z and D vars)
+```{r}
+agg_lvl = "cz" 
+dat <- load_dat_for_analysis(agg_lvl=agg_lvl)
+
+### Base Model
+gen_inputs_wlead(dat, agg_lvl=agg_lvl,
+                lead_period=10, 
+                fema_sub = TRUE,
+                d_stems = "nyt_hit_flag",
+                z_stems = "np_event",
+                cont_zd_avg=FALSE) %>%
+  gen_general_YonD_table(output_type="latex")
+
+gen_table_wlead(dat, agg_lvl=agg_lvl,
+                lead_period=10, 
+                fema_sub = TRUE,
+                d_stems = "nyt_hit_flag",
+                z_stems = "np_event",
+                output_type="latex",
+                cont_zd_avg=FALSE)
+```
+
+```{r}
+### Break apart instrument
+p1 <- gen_inputs_wlead(dat, agg_lvl=agg_lvl,
+                lead_period=20, 
+                fema_sub = TRUE,
+                d_stems = "nyt_hit_flag",
+                z_stems = c("np_olympics","np_sport_w","np_sport_s","np_death"),
+                cont_zd_avg=FALSE) 
+
+z_lab <- c("Olympics", "World Series", "Super Bowl", "Deaths")
+
+p1 %>% gen_general_table(output_type="latex")
+
+p1 %>% gen_general_stage1_table(output_type="latex", z_labels=z_lab)
+ 
+p1 %>% gen_general_YonZ_table(output_type="latex", z_labels=z_lab)
+
+```
+
+
+```{r}
+### Continuous: Total
+gen_inputs_wlead(dat, agg_lvl=agg_lvl,
+                lead_period=10, 
+                fema_sub = TRUE,
+                d_stems = "nyt_hits_total",
+                z_stems = "np_event",
+                cont_zd_avg=FALSE) %>%
+  gen_general_YonD_table(output_type="latex")
+
+gen_table_wlead(dat, agg_lvl=agg_lvl,
+                lead_period=10, 
+                fema_sub = TRUE,
+                d_stems = "nyt_hits_total",
+                z_stems = "np_event",
+                output_type="latex",
+                cont_zd_avg=FALSE)
+```
+
+```{r}
+### Continuous: Average
+gen_inputs_wlead(dat, agg_lvl=agg_lvl,
+                lead_period=10, 
+                fema_sub = TRUE,
+                d_stems = "nyt_hits_total",
+                z_stems = "np_event",
+                cont_zd_avg=FALSE) %>%
+  gen_general_YonD_table(output_type="latex")
+
+gen_table_wlead(dat, agg_lvl=agg_lvl,
+                lead_period=10, 
+                fema_sub = TRUE,
+                d_stems = "nyt_hits_total",
+                z_stems = "np_event",
+                output_type="latex",
+                cont_zd_avg=FALSE)
+```
+
+```{r}
+### Lead=20
+gen_inputs_wlead(dat, agg_lvl=agg_lvl,
+                lead_period=20, 
+                fema_sub = TRUE,
+                d_stems = "nyt_hit_flag",
+                z_stems = "np_event",
+                cont_zd_avg=FALSE) %>%
+  gen_general_YonD_table(output_type="latex")
+
+gen_table_wlead(dat, agg_lvl=agg_lvl,
+                lead_period=20, 
+                fema_sub = TRUE,
+                d_stems = "nyt_hit_flag",
+                z_stems = "np_event",
+                output_type="latex",
+                cont_zd_avg=FALSE)
+```
+
+```{r}
+### Lead=40
+gen_inputs_wlead(dat, agg_lvl=agg_lvl,
+                lead_period=40, 
+                fema_sub = TRUE,
+                d_stems = "nyt_hit_flag",
+                z_stems = "np_event",
+                cont_zd_avg=FALSE) %>%
+  gen_general_YonD_table(output_type="latex")
+
+gen_table_wlead(dat, agg_lvl=agg_lvl,
+                lead_period=40, 
+                fema_sub = TRUE,
+                d_stems = "nyt_hit_flag",
+                z_stems = "np_event",
+                output_type="latex",
+                cont_zd_avg=FALSE)
+```
+
+```{r}
+### Lead=60
+gen_inputs_wlead(dat, agg_lvl=agg_lvl,
+                lead_period=60, 
+                fema_sub = TRUE,
+                d_stems = "nyt_hit_flag",
+                z_stems = "np_event",
+                cont_zd_avg=FALSE) %>%
+  gen_general_YonD_table(output_type="latex")
+
+gen_table_wlead(dat, agg_lvl=agg_lvl,
+                lead_period=60, 
+                fema_sub = TRUE,
+                d_stems = "nyt_hit_flag",
+                z_stems = "np_event",
+                output_type="latex",
+                cont_zd_avg=FALSE)
+```
+
+
+## 2.2. Test: 1to1
+```{r}
+agg_lvl = "cz" 
+fema_sub <- TRUE
+dat <- load_dat_for_analysis_1to1(agg_lvl=agg_lvl, fema_sub=fema_sub)
+
+dat %<>% mutate_at(vars(contains("np_event")), funs(ifelse(.>0,1,0)))
+
+dat %<>% mutate(D = NA) %>%
+  mutate(D = ifelse(match_fema_sub==1, nyt_hit_flag_st_b4decl_sub, D)) %>%
+  mutate(D = ifelse(match_fema_sub==0, nyt_hit_flag_lead20_st, D))
+dat %<>% mutate(Z = NA) %>%
+  mutate(Z = ifelse(match_fema_sub==1, np_event_sum_b4decl_sub, Z)) %>%
+  mutate(Z = ifelse(match_fema_sub==0, np_event_lead20, Z))
+
+dat %<>%
+  # Create var with days before declaration 
+    mutate(days_b4_decl = as.numeric(date_declaration_sub - new_date_beg)) %>%
+  # Remove rows with declaration dates before the start of the disaster
+    filter((match_fema_sub==1 & days_b4_decl >= 0) | (match_fema_sub==0))
+  
+p <- list("dat"    = dat,
+          "y"        = "match_fema_sub",
+          "z"        = "Z",
+          "d"        = "D",
+          "x_vars"   = c("days_of_disaster","deaths_total","injuries_total"),
+          "geo_fe"   = c("STATE_FIPS_2", "FIPS"),
+          "time_fe"  = c("year", "month"),
+          "cluster_var" = c("Date", "STATE_FIPS_2")) 
+
+# p %>% gen_general_YonD_table()
+# p %>% gen_general_table()
+
+p %>% gen_general_YonD_table(output_type="latex")
+p %>% gen_general_table(output_type="latex")
+
+# p %>% gen_general_stage1_table(output_type="text", z_labels=NULL)
+# p %>% gen_general_YonZ_table(output_type="text", z_labels=NULL)
+
+```
+
+```{r}
+
+agg_lvl = "cz" 
+fema_sub <- TRUE
+dat <- load_dat_for_analysis_1to1(agg_lvl=agg_lvl, fema_sub=fema_sub)
+
+dat %<>%
+  # Create var with days before declaration 
+    mutate(days_b4_decl = as.numeric(date_declaration_sub - new_date_beg)) %>%
+  # Remove rows with declaration dates before the start of the disaster
+    filter((match_fema_sub==1 & days_b4_decl >= 0) | (match_fema_sub==0))
+
+# 
+# dat %<>% mutate_at(vars(contains("_lead10")), funs(./10)) #change in diff lead
+# dat %<>% mutate_at(vars(contains("_lead20")), funs(./20))
+# dat %<>% mutate_at(vars(contains("_lead40")), funs(./40))
+# dat %<>% mutate_at(vars(contains("_lead60")), funs(./60))
+# dat %<>% mutate_at(vars(contains("b4decl_sub")), funs(avg=./(days_b4_decl+1)))
+
+dat %<>% mutate(D = NA) %>%
+  mutate(D = ifelse(match_fema_sub==1, nyt_hits_total_st_b4decl_sub, D)) %>%
+  mutate(D = ifelse(match_fema_sub==0, nyt_hits_total_lead60_st, D))
+dat %<>% mutate(Z = NA) %>%
+  mutate(Z = ifelse(match_fema_sub==1, np_event_sum_b4decl_sub, Z)) %>%
+  mutate(Z = ifelse(match_fema_sub==0, np_event_lead60, Z))
+
+# hist(dat$Z)
+# hist(dat$D)
+
+p <- list("dat"    = dat,
+          "y"        = "match_fema_sub",
+          "z"        = "Z",
+          "d"        = "D",
+          "x_vars"   = c("days_of_disaster","deaths_total","injuries_total"),
+          "geo_fe"   = c("STATE_FIPS_2", "FIPS"),
+          "time_fe"  = c("year", "month"),
+          "cluster_var" = c("Date", "STATE_FIPS_2")) 
+
+# p %>% gen_general_YonD_table()
+# p %>% gen_general_table()
+
+p %>% gen_general_YonD_table(output_type="latex")
+p %>% gen_general_table(output_type="latex")
+
+```
+
+
+## 2.3. Plots 
+
+### 2.3.1. Distrib. of D and Z 
+```{r}
+
+agg_lvl = "cz" 
+dat <- load_dat_for_analysis(agg_lvl=agg_lvl)
+
+dat %>%
+  ggplot(aes(x=np_event_lead10)) + 
+    geom_histogram(bins=10, colour="white", fill="grey30") +
+    scale_y_log10(labels = scales::comma) +   
+    labs(title = "Distribution of News Pressure",
+         subtitle = "", caption = "",  x = "", y = "") + theme_ed
+plot_file_name <- paste0("../Plots/Merged/hist_disasters_np10.pdf")
+ggsave(plot_file_name, plot = last_plot(), width=8, height=6, units="in")
+
+dat %>%
+  ggplot(aes(x=np_event_lead60)) + 
+    geom_histogram(bins=30, colour="white", fill="grey30") +
+    scale_y_log10(labels = scales::comma) +   
+    labs(title = "Distribution of News Pressure",
+         subtitle = "", caption = "",  x = "", y = "") + theme_ed
+plot_file_name <- paste0("../Plots/Merged/hist_disasters_np60.pdf")
+ggsave(plot_file_name, plot = last_plot(), width=8, height=6, units="in")
+
+dat %>%
+  ggplot(aes(x=nyt_hits_total_lead10_st)) + 
+    geom_histogram(bins=10, colour="white", fill="grey30") +
+    scale_y_log10(labels = scales::comma) +   
+    labs(title = "Distribution of News Coverage",
+         subtitle = "", caption = "",  x = "", y = "") + theme_ed
+plot_file_name <- paste0("../Plots/Merged/hist_disasters_nyt10.pdf")
+ggsave(plot_file_name, plot = last_plot(), width=8, height=6, units="in")
+
+dat %>%
+  ggplot(aes(x=nyt_hits_total_lead60_st)) + 
+    geom_histogram(bins=30, colour="white", fill="grey30") +
+    scale_y_log10(labels = scales::comma) + 
+    labs(title = "Distribution of News Coverage",
+         subtitle = "", caption = "",  x = "", y = "") + theme_ed 
+plot_file_name <- paste0("../Plots/Merged/hist_disasters_nyt60.pdf")
+ggsave(plot_file_name, plot = last_plot(), width=8, height=6, units="in")
+
+```
+
+### 2.3.2. X distributions
+```{r}
+
+agg_lvl = "cz" 
+dat <- load_dat_for_analysis(agg_lvl=agg_lvl)
+
+dat %>%
+  ggplot(aes(x=days_of_disaster)) + 
+    geom_histogram(bins=30, colour="white", fill="grey30") +
+    scale_y_log10(labels = scales::comma) +   
+    # labs(title = "Distribution of Disaster Length in Days",
+    #      subtitle = "", caption = "",  x = "", y = "") + 
+    theme_ed
+plot_file_name <- paste0("../Plots/Merged/hist_disasters_length.pdf")
+ggsave(plot_file_name, plot = last_plot(), width=8, height=6, units="in")
+
+dat %>%
+  ggplot(aes(x=deaths_total)) + 
+    geom_histogram(bins=30, colour="white", fill="grey30") +
+    scale_y_log10(labels = scales::comma) +   
+    # labs(title = "Distribution of Total Deaths",
+    #      subtitle = "", caption = "",  x = "", y = "") + 
+    theme_ed
+plot_file_name <- paste0("../Plots/Merged/hist_disasters_deaths.pdf")
+ggsave(plot_file_name, plot = last_plot(), width=8, height=6, units="in")
+
+dat %>%
+  ggplot(aes(x=injuries_total)) + 
+    geom_histogram(bins=30, colour="white", fill="grey30") +
+    scale_y_log10(labels = scales::comma) +  
+    scale_x_log10(labels = scales::comma) +  
+    # labs(title = "Distribution of Total Injuries",
+    #      subtitle = "", caption = "",  x = "", y = "") + 
+    theme_ed
+plot_file_name <- paste0("../Plots/Merged/hist_disasters_injuries.pdf")
+ggsave(plot_file_name, plot = last_plot(), width=8, height=6, units="in")
+
+
+```
+
+### 2.3.3. FEMA Subset and Buffers
+```{r}
+agg_lvl = "cz" 
+dat <- load_dat_for_analysis(agg_lvl=agg_lvl)
+
+### Compare subset options
+dat %>% 
+  mutate_at(vars(contains("match_fema_b")), funs(ifelse(is.na(.),0,.))) %>%
+  group_by(year) %>%
+  summarise(All = mean(match_fema_b0),
+            Flood = mean(match_fema_d_b0) ) %>%
+  ungroup() %>%
+  mutate_at(vars(-year), ~ifelse(.==0,NA,.)) %>%
+  filter_at(vars(-year), any_vars(!is.na(.))) %>%
+  gather(key="Subset",value="pct",-year) %>%
+  ggplot(aes(x=year, y=pct, color=Subset, group=Subset)) + 
+    geom_point(aes(shape=Subset), size=2, alpha=0.75) + 
+    geom_line(size=1, alpha=0.75) + 
+    theme_ed +
+    scale_x_discrete(breaks = levels(dat$year)[c(T, rep(F, 4))]) +
+    scale_y_continuous(labels = scales::percent) +
+    scale_color_viridis(option = "B", end = .8, alpha=.4, discrete = TRUE) +
+    scale_shape_manual(values=c(0, 1, 2, 4)) +
+    labs(title = "Avg Disasters Recieving FEMA Declaration", x = "", y = "") 
+  
+plot_file_name <- paste0("../Plots/Merged/line_disasters_decl.pdf")
+ggsave(plot_file_name, plot = last_plot(), width=8, height=6, units="in")
+
+### Compare buffer options
+vlist <- paste0("match_fema_",c("d_b0","d_b3","d_b7","d_b14"))
+dat %>% 
+    group_by(year) %>%
+    mutate_at(vars(match_fema_b0, match_fema_b3, match_fema_b7, match_fema_b14),
+              funs(ifelse(is.na(.),0,.))) %>%
+    summarise_("b0" = paste0("mean(",vlist[1],")"),
+               "b3"= paste0("mean(",vlist[2],")"),
+               "b7" = paste0("mean(",vlist[3],")"),
+               "b14" = paste0("mean(",vlist[4],")") ) %>%
+    ungroup() %>%
+    mutate_at(vars(b0,b3,b7,b14), ~ifelse(.==0,NA,.)) %>%
+    filter(!is.na(b0) | !is.na(b3) | !is.na(b7) | !is.na(b14)) %>%
+    gather(key="Buffer",value="pct",-year) %>%
+    mutate(Buffer = factor(Buffer, levels = c("b0","b3","b7","b14"),
+                           labels = c("none","3 days","1 week","2 weeks"))) %>% 
+    ggplot(aes(x=year, y=pct, color=Buffer, group=Buffer)) + 
+      geom_point(aes(shape=Buffer), size=2, alpha=0.75) + 
+      geom_line(size=1, alpha=0.75) + 
+      theme_ed +
+      scale_x_discrete(breaks = levels(dat$year)[c(T, rep(F, 4))]) +
+      scale_y_continuous(labels = scales::percent) +
+      scale_color_viridis(option = "B", end = .8, alpha=.4, discrete = TRUE) +
+      scale_shape_manual(values=c(0, 1, 2, 4)) +
+      labs(title = "Avg Disasters Recieving FEMA Declaration", x = "", y = "") 
+
+plot_file_name <- paste0("../Plots/Merged/line_disasters_decl_sub_buffers.pdf")
+ggsave(plot_file_name, plot = last_plot(), width=8, height=6, units="in")
+```
+
+### 2.3.3. Time series: flood events by year
+```{r}
+
+agg_lvl = "cz" 
+dat <- load_dat_for_analysis(agg_lvl=agg_lvl)
+
+### Scatter Plot of Disasters by Year and incident type 
+dat %>%
+    mutate(year = as.integer(year(new_date_beg))) %>% 
+  # Remove duplicates for each disaster
+    distinct(stormid, year, FIPS) %>%
+  # Group by date and summarize the number of disasters 
+    group_by(year) %>%
+    summarize(count = n()) %>%
+    ungroup() %>%
+  # Plot 
+    ggplot(aes(x=year, y=count)) + 
+      geom_line(colour = "dark blue", size=1) + 
+      geom_point(na.rm = TRUE, colour = "dark blue", size=2) + 
+      theme_ed +
+      ggtitle("Storm Data Flood Disasters by Year") + 
+      # scale_x_continuous(breaks = c(1990:2018)[seq(1, 2018-1950+1, 2)]) +
+      xlab("Year") + ylab(NULL) #+ scale_y_continuous(trans=log10_trans()) #Log transformation
+
+ggsave("../Plots/Storm/scatter_count_by_year.pdf", 
+       plot = last_plot(), width=8, height=6, units="in") 
+
+```
+
+### 2.3.4. Days between Start of Disaster and FEMA Declaration
+```{r}
+agg_lvl = "cz" 
+fema_sub <- TRUE
+dat <- load_dat_for_analysis_1to1(agg_lvl=agg_lvl, fema_sub=fema_sub)
+
+dat %<>%
+  # Create var with days before declaration 
+    mutate(days_b4_decl = as.numeric(date_declaration_sub - new_date_beg)) 
+
+dat %>% filter(days_b4_decl < -100) %>%
+  dplyr::select(new_date_beg,
+         new_date_end,
+         disaster_num_sub,
+         date_declaration_sub,
+         match_fema_sub, 
+         np_event_lead60,
+         nyt_hits_total_lead60_st,         
+         np_event_sum_b4decl_sub,
+         nyt_hits_total_st_b4decl_sub,
+         days_b4_decl, days_of_disaster) %>% 
+  print.data.frame()
+
+dat %>%
+  filter(disaster_num_sub != 829) %>% 
+  ggplot(aes(x=days_b4_decl)) + 
+    geom_histogram(binwidth=5, colour="white", fill="grey30") +
+    labs(title = "Days between Start of Disaster and FEMA Declaration",
+         subtitle = "", caption = "",  x = "", y = "") + theme_ed +
+    geom_vline(aes(xintercept=0), color="red", size=1)
+plot_file_name <- paste0("../Plots/Merged/hist_disaster_decl_delay_sub.pdf")
+ggsave(plot_file_name, plot = last_plot(), width=8, height=6, units="in")
+
+```
+
+### 2.3.4. 1to1 FEMA Declaration
+```{r}
+agg_lvl = "cz" 
+fema_sub <- TRUE
+dat <- load_dat_for_analysis_1to1(agg_lvl=agg_lvl, fema_sub=fema_sub)
+
+sum(dat$match_fema_sub) / nrow(dat)
+
+dat %<>%
+  # Create var with days before declaration 
+    mutate(days_b4_decl = as.numeric(date_declaration_sub - new_date_beg)) 
+
+dat %>% filter(days_b4_decl < -100) %>%
+  dplyr::select(new_date_beg,
+         new_date_end,
+         disaster_num_sub,
+         date_declaration_sub,
+         match_fema_sub, 
+         np_event_lead60,
+         nyt_hits_total_lead60_st,         
+         np_event_sum_b4decl_sub,
+         nyt_hits_total_st_b4decl_sub,
+         days_b4_decl, days_of_disaster) %>% 
+  print.data.frame()
+
+dat %>%
+  filter(disaster_num_sub != 829) %>% 
+  ggplot(aes(x=days_b4_decl)) + 
+    geom_histogram(binwidth=5, colour="white", fill="grey30") +
+    labs(title = "Days between Start of Disaster and FEMA Declaration",
+         subtitle = "", caption = "",  x = "", y = "") + theme_ed +
+    geom_vline(aes(xintercept=0), color="red", size=1)
+plot_file_name <- paste0("../Plots/Merged/hist_disaster_decl_delay_sub.pdf")
+ggsave(plot_file_name, plot = last_plot(), width=8, height=6, units="in")
+
+```
+
+
+
