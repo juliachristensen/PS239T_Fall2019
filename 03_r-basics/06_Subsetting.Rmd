@@ -164,7 +164,7 @@ x[x < 3 | x > 5]
 
 # combining conditional statements with !
 !x > 5 
-x[!x > 5]
+x[!(x > 5)]
 ```
 
 ### 1.2. Useful Tricks for subsetting with [
@@ -231,19 +231,19 @@ country.vector<-c("Afghanistan", "Canada", "Sierra Leone", "Denmark", "Japan", "
 
 # Do it using positive integers
 
-country.vector[c(______)]
+country.vector[c(___________________)]
 
 # Do it using negative integers
 
-country.vector[-c(_____)]
+country.vector[-c(_______________)]
 
 # Do it using a logical vector
 
-country.vector[c(_______)]
+country.vector[c(________________)]
 
 # Do it using a conditional statement (and an implicit logical vector)
 
-country.vector[!________ %in% c(________)]
+country.vector[!________ %in% c(_________)]
 
 ```
 
@@ -418,7 +418,9 @@ Extract the R squared from the model summary.
 
 ```{r, eval=FALSE, error = TRUE}
 mod.sum <- summary(mod)
-mod.sum$______ # Fill in here
+
+# Fill in here
+
 ```
 
 
@@ -436,7 +438,7 @@ library(gapminder) #includes gapminder dataset
 glimpse(gapminder)
 
 # Print random sample of 10 rows 
-gapminder %>% sample_n(size=10) %>% print.data.frame()
+gapminder %>% sample_n(10) %>% print.data.frame()
 ```
 
 
@@ -444,6 +446,8 @@ gapminder %>% sample_n(size=10) %>% print.data.frame()
 
 `select()` function: 
 ```{r}
+head(select(gapminder, country, pop))
+
 # Subset columns 
 gapminder %>% select(country, pop) %>% head()
 gapminder %>% select(-country) %>% head()

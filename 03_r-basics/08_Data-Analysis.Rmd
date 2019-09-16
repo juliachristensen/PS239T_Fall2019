@@ -3,9 +3,13 @@ title: 'Data Analysis in R: Lecture Notes'
 author: "PS239T"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  html_document: default
-  pdf_document: default
-  word_document: default
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    df_print: paged
+    theme: flatly
+    highlight: pygments
 ---
 
 For most applied research, conducting data analysis in R involves the following core tasks: 
@@ -17,14 +21,33 @@ For most applied research, conducting data analysis in R involves the following 
 5. Testing relationships between variables, either [descriptive](#description) or [causal](#inferences) 
 
 
-# Setup environment
+# 0) SET UP 
 
-```{r eval=F}
+```{r}
 # remove all objects
 rm(list=ls())
-
 # note that this does not remove any packages you might already have called, just objects
 
+# # Install pacman if necessary (uncomment to do so)
+# install.packages("pacman")  
+
+# # Alternate installation 
+# install.packages("pacman", "devtools")  
+# library(devtools)
+# install_github("trinker/pacman")
+
+# Unload all packages 
+library(pacman)
+pacman::p_unload(all)
+
+# Add packages 
+pacman::p_load(
+  tidyverse, #dplyr, readr, etc.
+  data.table, #fread() 
+  foreign, #load data types including stata .dta files 
+  magrittr, #%<>% operator
+  skimr #for summerising
+)
 ```
 
 ** Tips **
@@ -32,7 +55,7 @@ rm(list=ls())
 But also be aware that this using `rm` and `setwd` are not best practices because they can create difficulties for replication. For instance, `rm` is an illusion. It only cleans up objects, so it's different from a fresh session. Other uses might find difficult to replicate your code if your code have dependencies. Similarly, `setwd` does not work because it makes your project *un*portable. For more advanced projects, I recommend you to learn using [here package](https://cran.r-project.org/web/packages/here/index.html). For more information on self-contained projects, see [this post](https://www.tidyverse.org/articles/2017/12/workflow-vs-script/).
 
 
-# 1. Constructing a dataset {#constructing-a-dataset}
+# 1) LOAD & CLEAN DATASET {#constructing-a-dataset}
 
 The first thing we want to do is load a dataset. This usually involves one or more of the following tasks:
 
@@ -40,64 +63,11 @@ a) ***Importing*** different types of data from different sources
 b) ***Cleaning*** the data, including subsetting, altering values, etc.
 c) ***Merging*** the data with other data
 
-## 1a: Importing Data
+## 1.1. Importing Data
 
-First, let's load any packages we need. 
+R can load almost any kind of data, but depending on your data type, you may need to load additional packages. For small and medium datasets, check the following website to see what functions and packages to use: https://www.statmethods.net/input/exportingdata.html.
 
-For spreadsheet data that **is not** explicitly saved as a Microsoft Excel file, we need an additional package: 
-
-```{r}
-# This package allows us to import non-Excel files of many different kinds:
-# install.packages("foreign") # Only necessary one time
-# Once it's installed, remember to load it (every time):
-
-library(foreign)
-```
-
-Now, let's load some of the data we want to work with. In R, you can pretty much load as many datasets as you want at the same time (this is different than Stata, which some of you may be familiar with).
-
-```{r}
-# Basic CSV read: Import country-year data with header row, values separated by ",", decimals as "."
-mydataset <- read.csv(file = "data/country-year.csv",
-                      stringsAsFactors = F)
-
-library(readr) # import readr package for read_csv function 
-mydataset <- read_csv(file = "data/country-year.csv") # this is for large data; string is default character 
-
-is.character(mydataset$region) # double check
-
-system.time(read.csv(file = "data/country-year.csv",
-                      stringsAsFactors = F)) # 0.031
-
-system.time(read_csv(file = "data/country-year.csv")) # 0.024
-```
-
-Let's load the PolityVI (autocracy and democracy scales) and CIRI Human Rights Project datasets (both csvs):
-
-```{r}
-library(tidyverse) # load tidyverse
-# install.packages("skimr") If you haven't installed skimr
-
-#impocountry.year
-polity <- read_csv("data/Polity/p4v2013.csv")
-
-# take a quick peek
-head(polity) # first 6 rows
-
-glimpse(polity) # if you need more information
-
-# impocountry.year
-ciri <- read_csv("data/CIRI/CIRI_1981_2011.csv")
-
-# take a quick peer
-head(ciri)
-```
-
-We can also import:
-
-* Other types of Microsoft Excel files (.xls or .xlsx):
-* Proprietary data formats (e.g.: .dta, .spss, .ssd) - these require the "foreign" package
-* Data from the web
+For large datasets, speed is a concern. Google the fastest way to import your data type and look for recent stackoverflow or blog posts to find the best package. 
 
 ** Tips **
 
@@ -105,7 +75,153 @@ We can also import:
 - For files larger than 100MB use fread() from data.table package and read_csv() from readr package 
 - Also, use rmd (native R file extension) rather than csv for large files.
 
-## 1b. Cleaning Data
+### 1.1.1. CSV File 
+
+*Base R*: Import country-year data with header row, values separated by ",", decimals as ".". Note that characters are automatically converted to factors. 
+```{r}
+dat_baser <- read.csv(file = "data/country-year.csv") # stringsAsFactors = F
+glimpse(dat_baser)
+```
+
+*Tidyverse*: faster than read.csv and does not automatically convert factors 
+```{r}
+# Tidyverse
+dat_readr <- readr::read_csv("data/country-year.csv")
+glimpse(dat_readr)
+```
+
+*data.table()*: fread is the fastest way to import large csv datasets in R and does not automatically convert factors 
+```{r}
+# data.table() 
+dat_dt <- fread("data/country-year.csv")
+glimpse(dat_dt)
+```
+
+Now, let's clean up our environment and save the .csv as different formats, so we can practice loading them. 
+```{r, eval=F}
+# Stata file 
+foreign::write.dta(dat_baser, "data/country-year.dta")
+
+# RData file 
+save(dat_baser, file="data/country-year.RData")
+save(dat_baser, dat_readr, file="data/country-year.RData")
+
+# RDS file 
+saveRDS(dat_baser, file="data/country-year.rds")
+
+# Clean up environment 
+rm(dat_baser, dat_readr, dat_dt)
+```
+
+### 1.1.2. Stata file 
+
+```{r}
+# Load stata .dta file 
+dat_dta <- foreign::read.dta("data/country-year.dta")
+
+# Note that periods (.) are coverted to underscores (_)
+glimpse(dat_dta)
+```
+
+### 1.1.3. RData  and RDS
+
+```{r}
+# RData
+load("data/country-year.RData")
+
+# Note you cannot save .RData objects under new name when loading
+dat <- load("data/country-year.RData")
+
+# RDS
+dat <- readRDS("data/country-year.rds")
+```
+
+
+### 1.1.4. Import from web address
+
+```{r}
+fema_dat <- read_csv("https://www.fema.gov/api/open/v1/FemaWebDisasterDeclarations.csv")
+glimpse(fema_dat)
+```
+
+### 1.1.5. Exercise 
+
+First, clean up the environment 
+```{r}
+# remove all objects
+rm(list=ls())
+```
+
+Let's load the PolityVI (autocracy and democracy scales) and CIRI Human Rights Project datasets (both csvs):
+
+* Open "data/Polity/p4v2013.csv" and save as object called `polity` 
+* Open "data/CIRI/CIRI_1981_2011.csv" and save as object called ciri
+
+```{r, eval=F}
+# Import polity dataset 
+polity <- ______________________
+
+# Look at 6 rows using head() or sample_n()
+head(_______)
+sample_n(________, __)
+
+# Look at data with glimpse()
+glimpse(_______)
+
+# Open other dataset 
+ciri <- ____________________
+
+# Look at 6 rows using head() or sample_n()
+head(_______)
+sample_n(________, __)
+
+# Look at data with glimpse()
+glimpse(_______)
+```
+
+
+Solutions: 
+```{r}
+# Import polity dataset 
+polity <- read_csv( "data/Polity/p4v2013.csv")
+
+# Import 
+ciri <- read_csv("data/CIRI/CIRI_1981_2011.csv")
+```
+
+```{r}
+### Polity 
+
+# First 6 rows 
+head(polity) #no piping 
+polity %>% head() #with piping 
+
+# Random 6 rows 
+polity %>% sample_n(6)
+
+# Look at data with glimpse
+glimpse(polity)
+polity %>% glimpse() 
+
+### Ciri
+
+# First 6 rows 
+head(ciri) #no piping 
+ciri %>% head() #with piping 
+
+# Random 6 rows 
+ciri %>% sample_n(6)
+
+# Look at data with glimpse
+glimpse(ciri)
+ciri %>% glimpse() 
+```
+
+
+
+## 1.2. Cleaning Data
+
+### 1.2.1. Look at data 
 
 Let's start with the Polity dataset on political regime characteristics and transitions. First, let's inspect the dataset.
 
@@ -116,7 +232,6 @@ class(polity)
 # Get the object dimensionality 
 dim(polity) # Note this is rows by columns
 ```
-
 
 ```{r}
 
@@ -138,6 +253,8 @@ str(polity) # base r
 glimpse(polity) # dplyr
 ```
 
+### 1.2.2. Subset
+
 We'll first want to subset, and maybe alter some values.
 
 ```{r}
@@ -149,18 +266,18 @@ summary(polity$year)
 
 # subset the data (non-dplyr)
 country.year <- subset(polity, year > 1979 & year < 2013)
-
 country.year <- country.year[c("ccode", "country", "year", "polity", "democ", "autoc")]
 
 # subset the data (dplyr)
-
 country.year <- polity %>%
   filter(year > 1979 & year < 2013) %>%   
   select(ccode, country, year, polity, democ, autoc)
 
 # take a look
 head(country.year)
+```
 
+```{r}
 # quickly summarize the polity column
 summary(country.year$polity)
 
@@ -173,22 +290,24 @@ country.year %>%
 
 # Note how the summary has changed - minimum value and NAs have changed
 summary(country.year$polity)
+```
 
+```{r}
 # get a list of all the countries in the dataset
-head(unique(country.year$country))
+head(unique(country.year$country)) #baser
+country.year %>% distinct(country) %>% head #tidyverse
 
 # delete records
 country.year <- country.year[-which(country.year$country == "Sudan-North"), ]
 
-```
-
-```{r}
-# different way of deleting the same records
+# different ways of deleting the same records
 country.year <- country.year[!(country.year$country == "Sudan-North"),]
 
+country.year %<>% filter(country != "Sudan-North")
 ```
 
-## 1c. Merging data
+
+## 1.3. Merging data
 
 Oftentimes, we want to combine data from multiple datasets to construct our own dataset. This is called **merging**. In order to merge datasets, at least one column has be to shared between them. This column is usually a vector of keys, or unique identifiers, by which you can match observations.
 
@@ -213,12 +332,19 @@ names(country.year)
 names(ciri.subset) <- c("year","ccode","unreg","physint","speech","new_empinx","wecon","wopol","wosoc","elecsd") # Mini-challenge - what code could you use to change all the column names to lowercase in one fell swooop? 
 
 names(ciri.subset) 
+```
 
-# merge
+Then merge the datasets.
+
+```{r}
 # merge format: merge(dataset1, dataset2, by=c(id variables), additional specifications as nec.)
-
 country.year <- merge(country.year,ciri.subset, by = c("year","ccode"), all.x=TRUE)
+```
 
+Afterwards, we may want to remove duplicate rows. 
+
+Base r deduplication: 
+```{r, eval=F}
 # delete duplicates using indexing
 which(duplicated(country.year))
 
@@ -237,9 +363,16 @@ identical(country.year[-duplicates,],
   unique(country.year))
 ```
 
+Tidyverse: 
+```{r}
+country.year %<>% distinct()
+```
+
 We can keep doing this for many datasets until we have a brand-spanking new dataset! 
 
-## Fast forward:
+## 1.4. Load cleaned dataset
+
+Fast forward:
 
 ```{r}
 country.year <- read.csv("data/country-year.csv")
@@ -249,13 +382,14 @@ names(country.year)
 head(country.year)
 ```
 
-# 2. Summarizing {#summarizing}
+
+**********************************************************
+
+# 2. SUMMARISE {#summarizing}
 
 First let's get a quick summary of all variables.
 
 ```{r}
-library(skimr) # load skimr
-
 summary(country.year)
 
 skim(country.year) # skim function is very informative 
@@ -303,7 +437,7 @@ Finally, let's quickly take a look at a histogram of the variable `nyt.count`:
 hist(country.year$nyt.count, breaks = 100)
 ```
 
-# 3. Calculating across groups {#calculating-across-groups}
+## 2.1. Calculating across groups {#calculating-across-groups}
 
 Let's say we want to look at the number of NYT articles per region.
 
@@ -316,14 +450,6 @@ sum(country.year$nyt.count[country.year$region == "LA"], na.rm = T)
 ```
 
 That can get tedious! A better way uses the popular new `dplyr` package, which uses a the ***split-apply-combine*** strategy. We **split** the data using some variable or variables to group our data, we **apply** some kind of function (either a built-in one, or one we write ourselves), and then we re-**combine** the data into a new dataset
-
-```{r}
-# Install the "dplyr" package (only necessary one time)
-# install.packages("dplyr") 
-
-# Load the "plyr" package (necessary every new R session)
-library(dplyr)
-```
 
 All of the major dplyr functions have the same basic syntax. In this case, we're going to use summarise, which will let us do what took a few steps before in a single step!
 
@@ -380,7 +506,9 @@ head(by.year.count)
 
 dplyr has a number of other useful functions (all of which follow the same syntax), which you'll see more of in your homework for this week. 
 
-# 4. Reshaping {#reshaping} 
+**********************************************************
+
+# 3) RESHAPING {#reshaping} 
 
 Our country.year dataset, is currently in what's called "long" form: nyt article values are specified in the nyt.count column, and the country and year (aka, what uniquely identifies each value) are specified in each row. Let's say we wanted to make a new "wide" database, where each country has its own row, and the article counts within each year exist in multiple columns in that row. 
 
@@ -398,13 +526,6 @@ France | 952 | 893
 
 
 Base R does have commands for reshaping data (including **aggregate**, **by**, **tapply**, etc.), but each of their input commands are slightly different and are only suited for specific reshaping tasks. The **reshape2** package overcomes these argument and task inconsistencies, but is fairly slow. A recent alternative is **tidyr**, which has an easy syntax, interfaces well with dplyr, and works much faster:
-
-```{r}
-# install.packages("tidyr") # (only necessary one time)
-
-# Load the "tidyr" package (necessary every new R session)
-library(tidyr)
-```
 
 The package contains two major commands, **gather** (for our current purposes, that means reformat from wide to long) and **spread** (reformat from long to wide). Here, want the **spread** funciton.
 
@@ -425,12 +546,15 @@ write.csv(region.count.wide, "region_year_counts.csv")
 count.region.year
 ```
 
+**********************************************************
 
-# 5. Description and Inference
+# 5. STATS 
+
+Description and Inference. 
 
 Once we've imported our data, summarized it, carried out group-wise operations, and perhaps reshaped it, we may also want to assess quantitatively the relationships between our variables. We tend to describe these tests as falling into one of two categories: **descriptive**, which implies that we don't have a way to understand causation (e.g., did x cause y, or y cause x?), and **inferential**, in which we believe that we do have a way to assess whether the relationship between x and y (for instance) is **causal** (e.g., by using a randomized controlled trial). 
 
-## 5a. Descriptive tests {#description}
+## 5.1. Descriptive tests {#description}
 
 This often requires doing the following:
 1) Assessing correlations
@@ -439,7 +563,7 @@ This often requires doing the following:
 
 Note that this class is not intended to serve as quantitative training and thus does not go into any nitty-gritty details of (for example) assessing causal identification; these are meant to be bare-bones instructions on how to run basic functions. 
 
-## 5b. Correlations
+## 5.2. Correlations
 
 Often, when we want to quickly understand the relationship between two variables, and for whatever reason we want to summarize that quantitatively, we run a correlation (though, as you'll learn next week, exploring your data should be done **visually** FIRST, and correlations are no substitute for visualization). 
 
@@ -453,7 +577,7 @@ cor(country.year$gdp.pc.un, country.year$pop.wdi, use="pairwise.complete.obs", m
 
 What happens if we change which observations are included? Does the correlation change if we use a different kind of test? Use `?cor` to see your options. 
 
-## 5c. Hypothesis Testing
+## 5.3. Hypothesis Testing
 
 Let's say we're interested in whether the New York Times covers MENA differently than the West in terms of quantity. One can test for differences in distributions in either a) their means using t-tests, or b) their entire distributions using ks-tests
 
@@ -481,7 +605,7 @@ t.test(x=nyt.africa.logged, y=nyt.mena.logged)
 ks.test(x=nyt.africa.logged, y=nyt.mena.logged)
 ```
 
-## 5d. Regressions {#inferential}
+## 5.4. Regressions {#inferential}
 
 Running regressions in R is extremely simple, very straightforward (though doing things with standard errors requires a little extra work). **lm** is the most basic OLS regression you can run, and the most basic catch-all non-linear regression function in R is *glm*, which fits a generalized linear model with your choice of family/link function (gaussian, logit, poisson, etc.). 
 
