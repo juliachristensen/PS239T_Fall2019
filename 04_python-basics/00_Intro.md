@@ -1,8 +1,8 @@
 # Python Basics: 0-1 Introduction.
 
-Lectures draw heavily upon material from the D-Lab Python Intensives course. Additional homeworks are available in the folder should you be interested. These lectures will teach you how to:
+Lectures draw heavily upon material from the D-Lab Python Intensives course and previous versions of this course. Additional homeworks are available in the folder should you be interested. These lectures will teach you how to:
 
-1. Run Python from both the Shell and in an IPython (Jupyter) Notebook
+1. Run Python from both the Shell, Spyder (IDE) and in an IPython (Jupyter) Notebook
 2. Write basic commands using Python syntax
 3. Grasp the major utilities of Python [object](https://github.com/dlab-berkeley/python-intensive/blob/master/Glossary.md#object) [types](https://github.com/dlab-berkeley/python-intensive/blob/master/Glossary.md#type), including [integers](https://github.com/dlab-berkeley/python-intensive/blob/master/Glossary.md#integer), [floats](https://github.com/dlab-berkeley/python-intensive/blob/master/Glossary.md#floating-point-number), [strings](https://github.com/dlab-berkeley/python-intensive/blob/master/Glossary.md#string), lists, sets, and dictionaries
 4. Operate and manipulate those objects
@@ -75,7 +75,7 @@ If you're a good programmer, you're a good detective!
 * Python has informative errors. This means that it will tell you where the error occurred, and usually, why it occurred (e.g., missing parenthesis). 
 * Where R uses piping (using the magrittr package, which runs "under the hood" of dplyr), Python uses a very simple dot syntax. 
 * Python doesn't store everything in memory the way R does, and it's processed at a lower level than in R, which means that all else being equal, Python will be faster to execute than R. 
-* Python doesn't have an IDE similar to RStudio, which means the interface is fairly different (though the process of typing a script in a notebook is very similar to an R-markdown file). 
+* Python doesn't have an IDE similar to RStudio (Spyder comes close!), which means the interface is fairly different (though the process of typing a script in a notebook is very similar to an R-markdown file). 
 
 ## Other Considerations
 * Python is a multi-use or generalist-type programming language, whereas R is a statistical language built specifically for manipulating data. That means that Python has tons of packages for things social scientists will never dream of using. However, R has much more specific and tailored capabilities where it comes to things like analyzing and visualizing data. 
