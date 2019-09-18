@@ -286,9 +286,9 @@ FALSE <= 1
 
 1. What type of vector does each of the following calls to ifelse() return?
 ```{r}
-ifelse(TRUE, 1, "no")
-ifelse(FALSE, 1, "no")
-ifelse(NA, 1, "no")
+ifelse(TRUE, 1, "no") %>% class()
+ifelse(FALSE, 1, "no") %>% class()
+ifelse(NA, 1, "no") %>% class()
 ```
 
 2. Why does the following code work?
@@ -322,7 +322,7 @@ df <- data.frame(
   c = c(1, 2, 3, -99, 5, 6, 7, 8, 9, -9),
   d = c(1, -9, 3, 4, 5, 6, 7, 8, 9, 10),
   e = c(1, 2, 3, 4, 5, -99, 7, 8, 9, 10),
-  f = c(1, 2, 3, 4, -9, 6, 7, 8, 9, 10),
+  f = c(1, 2, 3, 4, -9, 6, 7, 8, 9, 10)
 )
 
 # Tedious/brute force code 
@@ -335,7 +335,7 @@ df$f[df$f == -99] <- NA
 
 # Now write function  
 fix_missing <- function(x) {
-  x[x == -99] <- NA
+  x[x == -99 | x == -9] <- NA
   x
 }
 
@@ -497,6 +497,7 @@ fruits <- c("apples", "oranges", "pears", "bananas")
 # a for loop
 for(i in 1:length(fruits)){
   print(fruits[i])
+  print(paste0("Example ", i))
 }
 
 # a while loop
@@ -515,6 +516,9 @@ The following exercises are adapted from https://www.r-exercises.com/2018/01/22/
 
 1. Write a for loop that iterates over the numbers 1 to 7 and prints the cube of each number. 
 ```{r}
+for(i in 1:7){
+  print(i^3)
+}
 
 ```
 
