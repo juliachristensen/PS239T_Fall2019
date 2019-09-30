@@ -1,67 +1,67 @@
-Accessing Databases via Web APIs
-========================================================
-author: PS239T
-date: Spring 2018
-
-What is an API?
+# Accessing Databases via Web APIs
 ========================================================
 
-* API stands for **Application Programming Interface**
+> ### Learning objectives
+> 
+> * Explain purpose of API 
+> * Explain how API used for data science
+> * Explain basic syntax and concepts for using APIs (for data science)
 
-* a set of rules and procedures that facilitate interactions between computers and their applications
-
-* This is an API (thanks to Quora for the example):
-![](figures/apis_metaphor.jpeg)
-
-Web APIs
 ========================================================
 
+
+
+## What is an API?
+========================================================
+
+API stands for **Application Programming Interface**. They are sets of rules and procedures that facilitate interactions between computers and their applications. 
+
+In other words, APIs standardize how information is communicated electronically. 
+
+### Web APIs
+
+Web APIs are a type of API that...
 * allows users to query a remote database over the internet
-
 * take on a variety of formats 
 
-* majority adhere to a particular style known as **Representational State Transfer** or **REST**
+### "RESTful" APIs
 
+We will focus on web APIs that adhere to the REST standard: 
+* majority of web APIs adhere to a particular style known as **Representational State Transfer** or **REST**. 
 * "RESTful" APIs are convenient because we can use them to query databases using URLs 
 
-RESTful Web APIs are All Around You...
+
+## RESTful Web APIs are All Around You
 ========================================================
 
-Consider a simple Google search.
+Consider a simple Google search (go ahead and search something). Ever wonder what all that extra stuff in the address bar was all about?  
 
-Go ahead and search something.
+> **Mini-challenge:** search for the URL `https://www.google.com/search?q=API`. Note that this is equivilent to searching 'API' using google search. 
 
-Ever wonder what all that extra stuff in the address bar was all about?  
+It looks like Google makes its query by taking the search terms, separating each of them with a "`+`", and appending them to the link: `https://www.google.com/#q=`. So that we have `https://www.google.com/#q=search1+search2`
 
-RESTful Web APIs are All Around You...
+Notice that we can change our Google search by adding some terms to the URL.
+
+> **Mini-challenge:** modify your 'API' search to include both 'API' and 'definition' by changing the URL (don't type anything new in the search box).  
+
+
+## Some Basic Terminology
 ========================================================
 
-It looks like Google makes its query by taking the search terms, separating each of them with a "`+`", and appending them to the link:
+### URL
 
-`https://www.google.com/#q=`
+URL stands for Uniform Resource Location. URLs are strings of characters that, when interpreted via the Hypertext Transfer Protocol (HTTP), point to a data resource, notably files written in Hypertext Markup Language (HTML) or a subset of a database.
 
-So that we have
+### HTTP Methods / Verbs
 
-`https://www.google.com/#q=search1+search2`
+Developers use a number of common methods including `GET`, `HEAD`, `POST`, `PUT`, and `DELETE` to query, modify, etc. data in a database. 
 
-So can change our Google search by adding some terms to the URL.
+Only one of these is relevant for our purposes: `GET`. 
 
-Some Basic Terminology: URL
-========================================================
-
-* Uniform Resource Location
-* a string of characters that, when interpreted via the Hypertext Transfer Protocol (HTTP)
-* points to a data resource, notably files written in Hypertext Markup Language (HTML) or a subset of a database.
+The *GET* method requests a representation of a data resource corresponding to a particular URL.  The process of executing the GET method is often referred to as a **GET request** and is the main method used for querying RESTful databases.
 
 
-Some Basic Terminology: HTTP Methods / Verbs
-========================================================
-
-* *GET*: requests a representation of a data resource corresponding to a particular URL.  The process of executing the GET method is often referred to as a "GET request" and is the main method used for querying RESTful databases.
-    
-*  *HEAD*, *POST*, *PUT*, *DELETE*: other common methods, though mostly never used for database querying.
-
-How Do GET Requests Work?  A Web Browsing Example
+## How Do GET Requests Work?  A Web Browsing Example
 ========================================================
 
 * Surfing the Web = Making a bunch of GET Requests
@@ -70,8 +70,7 @@ How Do GET Requests Work?  A Web Browsing Example
 
 * Several different processes occured, however, between me hitting "return" and the page finally being rendered. 
 
-Step 1: The GET Request
-========================================================
+### Step 1: The GET Request
 
 * web browser took the entered character string 
 * used the command-line tool "Curl" to write a properly formatted HTTP GET request 
@@ -84,10 +83,9 @@ STEP 2: The Response
 * send back an HTTP response
 * from which Curl extracted the HTML code for the page
 
-```{r, echo=FALSE}
-wiki<-httr::GET(url = "http://www.wikipedia.org")
-body<-httr::content(x = wiki, as = "text")
-substr(x = body, start = 1, stop = 300)
+
+```
+[1] "<!DOCTYPE html>\n<html lang=\"mul\" class=\"no-js\">\n<head>\n<meta charset=\"utf-8\">\n<title>Wikipedia</title>\n<meta name=\"description\" content=\"Wikipedia is a free online encyclopedia, created and edited by volunteers around the world and hosted by the Wikimedia Foundation.\">\n<![if gt IE 7]>\n<script>\ndocum"
 ```
 
 STEP 3: The Formatting

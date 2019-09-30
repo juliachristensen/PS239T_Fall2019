@@ -1,7 +1,7 @@
 Accessing Databases via Web APIs
 ========================================================
 author: PS239T
-date: Spring 2018
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 
 What is an API?
 ========================================================
@@ -84,9 +84,10 @@ STEP 2: The Response
 * send back an HTTP response
 * from which Curl extracted the HTML code for the page
 
-
-```
-[1] "<!DOCTYPE html>\n<html lang=\"mul\" class=\"no-js\">\n<head>\n<meta charset=\"utf-8\">\n<title>Wikipedia</title>\n<meta name=\"description\" content=\"Wikipedia is a free online encyclopedia, created and edited by volunteers around the world and hosted by the Wikimedia Foundation.\">\n<![if gt IE 7]>\n<script>\ndocum"
+```{r, echo=FALSE}
+wiki<-httr::GET(url = "http://www.wikipedia.org")
+body<-httr::content(x = wiki, as = "text")
+substr(x = body, start = 1, stop = 300)
 ```
 
 STEP 3: The Formatting
