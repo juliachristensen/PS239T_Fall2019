@@ -200,28 +200,39 @@ Now that we have our handy NYT API function, let's try and do some data analysis
  
 ```{r}
 # Get number of hits, number of page queries
-impeachment<-nytapi(search.terms = "impeachment", begin.date = 20190601, end.date = 20190930, key=nyt_key_1)
+impeachment<-nytapi(search.terms = "impeachment", begin.date = 201909010, end.date = 20190930, key=nyt_key_1)
 hits<-impeachment$response$meta$hits
 print(hits)
 round(hits/10)
 ```
 
-After making a quick call to the API, it appears that we have 723 hits. Since the API only allows us to download 10 results at a time, we need to make 73 calls! 
+After making a quick call to the API, it appears that we have 454 hits. Since the API only allows us to download 10 results at a time, we need to make 46 calls! 
 ```{r}
 # Get all articles   
-impeachment.articles<-sapply(X = 0:73, FUN = function(page){
+impeachment.articles<-sapply(X = 0:46, FUN = function(page){
   #cat(page, "")
   response<-tryCatch(expr = {
-    r<-nytapi(search.terms = "impeachment", begin.date = 20190601, end.date = 20190930, page = page, key = nyt_key_1)
+    r<-nytapi(search.terms = "impeachment", begin.date = 20190901, end.date = 20190930, page = page, key = nyt_key_1)
     r$response$docs
-    Sys.sleep(10) #sleep 10 seconds
   }, error=function(e) NULL)
+  Sys.sleep(7) #sleep 7 seconds
+  print(paste0("Finished page ",page,"."))
   return(response)
 })
+
+impeachment.articles.orig <- impeachment.articles
 
 # Combine list of dataframes
 impeachment.articles<-impeachment.articles[!sapply(X = impeachment.articles, FUN = is.null)]
 impeachment.articles<-dplyr::bind_rows(impeachment.articles)
+
+# save
+save(impeachment.articles, impeachment.articles.orig, file="data_raw/impeachment_articles.RData")
+```
+
+Load 
+```{r}
+load("data_raw/impeachment_articles.RData")
 ```
 
 ## 2.7. Analyze Results
@@ -238,7 +249,7 @@ impeachment.permonth <-impeachment.articles %>%
 
 # Plot the trend over time
 ggplot(data = impeachment.permonth, 
-       aes(x = year.month, y = monthly.articles)) +
+       aes(x = pub_date, y = monthly.articles)) +
   geom_point() +
   theme_bw() + 
   xlab(label = "Date") +
@@ -305,7 +316,7 @@ For most popular APIs, the R community has created packages that format, send, a
 
 Replicate the above analysis of impeachment stories in part 2 using the `rtimes` package. 
 
-```{r}
+```{r, eval=FALSE}
 pacman::p_load(
   rtimes #https://cran.r-project.org/web/packages/rtimes/vignettes/rtimes_vignette.html
 )

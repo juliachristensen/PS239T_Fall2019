@@ -107,7 +107,7 @@ Web browser parsed the HTML code, but **we need R, Python, or other programming 
 
 ## Example: 
 
-Characterize the volume of coverage of impeachment over the past few months years. Specifically, what trends do you see?
+Characterize the volume of coverage of impeachment over the past few weeks. Specifically, what trends do you see?
 
 ### STEP 1: Finding Data Resources
 
