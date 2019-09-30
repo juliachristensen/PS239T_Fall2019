@@ -5,9 +5,10 @@ Note that many popular API providers have multiple APIs available to provide dif
 ## Popular or useful APIs
 
 Some of the most popular and useful API providers include...
-* [NYT Article API](http://developer.nytimes.com/) -- see the [article search](https://developer.nytimes.com/docs/articlesearch-product/1/overview) API in particular 
+* [NYT Article API](http://developer.nytimes.com/) 
+	* The [article search](https://developer.nytimes.com/docs/articlesearch-product/1/overview) API is particularly popular. 
 * [World Bank](https://datahelpdesk.worldbank.org/knowledgebase/topics/125589-developer-information)
-* [US Census]((Links to an external site)
+* [US Census](https://www.census.gov/developers/)
 * [Twitter](https://developer.twitter.com/en/docs)
 * The US Congress API has been hosted by numerous organizations over the years. 
 	* [Propublica](https://projects.propublica.org/api-docs/congress-api/)
