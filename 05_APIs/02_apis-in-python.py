@@ -10,17 +10,41 @@ import requests
 import urllib
 import json
 import math
+import time
 
+# Change working directory to API subfolder  
+import os
+os.chdir("C:/Users/Julia/OneDrive/Documents/Berkeley/2019-08_Fall/PS239T_Fall2019/05_APIs")
+
+# Julia's computer? 
+julia_computer = "TRUE"
+
+# In[14]:
+
+# Execute .py file with API keys 
+    
+# Get API key subfolder 
+if julia_computer == "TRUE":
+    api_key_folder="api_keys_jbc"
+else:
+    api_key_folder="api_keys"
+
+# Read API key info 
+exec(open(api_key_folder+"/02_api_keys_nyt_python.py").read())
+
+# In[ ]:
 
 # ## 1. Constructing API GET Request
 # 
 # In the first place, we know that every call will require us to provide a) a base URL for the API, b) some authorization code or key, and c) a format for the response. So let's put store those in some variables.
 
 # In[14]:
-
+    
 # set key
-key="[ADD YOUR KEY HERE]"
-key="7iJ3lTTEh7wao3Jr1HR8BUr9D6RQwACA"
+key=nyt_key_1
+
+# Alternatively, you could save the API key string directly in the 'key' variable 
+# key="[ADD YOUR KEY HERE]"
 
 # set base url
 base_url="http://api.nytimes.com/svc/search/v2/articlesearch"
@@ -34,7 +58,7 @@ response_format=".json"
 # In[15]:
 
 # set search parameters
-search_params = {"q":"Prince",
+search_params = {"q":"imeachment",
                  "api-key":key}       
 
 
@@ -59,7 +83,7 @@ print(r.url)
 # In[18]:
 
 # set search parameters
-search_params = {"q":"Prince music",
+search_params = {"q":"imeachment+ukraine",
                  "api-key":key}  
 # make request
 r = requests.get(base_url+response_format, params=search_params)
@@ -92,9 +116,9 @@ print(r.url)
 
 # In[20]:
 
-search_params = {"q":"Prince music",
-                 "begin_date": "20050101",
-                 "end_date": "20050131",
+search_params = {"q":"imeachment+ukraine",
+                 "begin_date": "20190101",
+                 "end_date": "20190930",
                  "page": "1",
                  "api-key":key}  
 # make request
@@ -196,9 +220,6 @@ docs[1]
 
 # In[33]:
 
-# set key
-# key="XXX"
-
 # set base url
 base_url="http://api.nytimes.com/svc/search/v2/articlesearch"
 
@@ -206,10 +227,10 @@ base_url="http://api.nytimes.com/svc/search/v2/articlesearch"
 response_format=".json"
 
 # set search parameters
-search_params = {"q":"Prince music",
+search_params = {"q":"imeachment+ukraine",
                  "api-key":key,
-                 "begin_date":"20150101", # date must be in YYYYMMDD format
-                 "end_date":"20150131"}
+                 "begin_date":"20190101", # date must be in YYYYMMDD format
+                 "end_date":"20190130"}
 
 # make request
 rr = requests.get(base_url+response_format, params=search_params)
@@ -248,6 +269,9 @@ for i in range(pages):
         
     # add those docs to the big list
     all_docs = all_docs + docs
+    
+    # add pause
+    time.sleep(5)
 
 
 # In[ ]:
@@ -266,10 +290,7 @@ len(all_docs)
 
 # In[ ]:
 
-def apisearch(q, begin):
-    # set key
-    key="[ADD KEY HERE]"
-    key="7iJ3lTTEh7wao3Jr1HR8BUr9D6RQwACA"
+def apisearch(q, begin, key):
     # set base url
     base_url="http://api.nytimes.com/svc/search/v2/articlesearch"
     # set response format
@@ -286,7 +307,7 @@ def apisearch(q, begin):
 
 # In[ ]:
 
-apisearch("Clinton", "20140101")
+apisearch("Clinton", "20140101", key)
 
 
 # ## 4. Formatting and Exporting
