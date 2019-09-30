@@ -207,7 +207,7 @@ round(hits/10)
 ```
 
 After making a quick call to the API, it appears that we have 454 hits. Since the API only allows us to download 10 results at a time, we need to make 46 calls! 
-```{r}
+```{r, eval=FALSE}
 # Get all articles   
 impeachment.articles<-sapply(X = 0:46, FUN = function(page){
   #cat(page, "")
