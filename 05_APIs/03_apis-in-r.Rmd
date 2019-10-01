@@ -43,7 +43,9 @@ pacman::p_unload(all)
 # Add packages 
 pacman::p_load(
   tidyverse, #dplyr, readr, etc.
-  magrittr #%<>% operator
+  magrittr, #%<>% operator
+  httr,
+  jsonlite
 )
 ```
 
@@ -200,19 +202,25 @@ Now that we have our handy NYT API function, let's try and do some data analysis
  
 ```{r}
 # Get number of hits, number of page queries
-impeachment<-nytapi(search.terms = "impeachment", begin.date = 201909010, end.date = 20190930, key=nyt_key_1)
+impeachment<-nytapi(search.terms = "impeachment", 
+                    begin.date = 20190901, end.date = 20190930, 
+                    key=nyt_key_1)
 hits<-impeachment$response$meta$hits
 print(hits)
-round(hits/10)
+total_pages <- ceiling(hits/10) %>% print()
 ```
 
-After making a quick call to the API, it appears that we have 454 hits. Since the API only allows us to download 10 results at a time, we need to make 46 calls! 
+After making a quick call to the API, it appears that we have 461 hits. Since the API only allows us to download 10 results at a time, we need to make 47 calls! 
 ```{r, eval=FALSE}
 # Get all articles   
-impeachment.articles<-sapply(X = 0:46, FUN = function(page){
+impeachment.articles<-sapply(X = 0:total_pages, FUN = function(page){
   #cat(page, "")
   response<-tryCatch(expr = {
-    r<-nytapi(search.terms = "impeachment", begin.date = 20190901, end.date = 20190930, page = page, key = nyt_key_1)
+    r<-nytapi(search.terms = "impeachment", 
+              begin.date = 20190901, 
+              end.date = 20190930, 
+              page = page, 
+              key = nyt_key_1)
     r$response$docs
   }, error=function(e) NULL)
   Sys.sleep(7) #sleep 7 seconds
@@ -220,39 +228,53 @@ impeachment.articles<-sapply(X = 0:46, FUN = function(page){
   return(response)
 })
 
+# Save a copy of the raw loop output for comparison 
 impeachment.articles.orig <- impeachment.articles
 
 # Combine list of dataframes
 impeachment.articles<-impeachment.articles[!sapply(X = impeachment.articles, FUN = is.null)]
 impeachment.articles<-dplyr::bind_rows(impeachment.articles)
 
-# save
+# Save raw and reformatted loop output 
 save(impeachment.articles, impeachment.articles.orig, file="data_raw/impeachment_articles.RData")
 ```
 
-Load 
+Note that the `tryCatch()` function tells R to skip the expression inside when R returns an error. This prevents the loop from breaking and discarding any progress before or after the error. 
+
+Since the above loop takes several minutes to run, we can skip this step for now by loading a copy of the results that I saved earlier. 
 ```{r}
 load("data_raw/impeachment_articles.RData")
 ```
 
 ## 2.7. Analyze Results
 
-To figure out how impeachment's popularity is changing over time, all we need to do is add an indicator for the year and month each article was published in.
+To figure out how impeachment's popularity is changing over time, all we need to do is add an indicator for the day each article was published in.
 ```{r}
+# Save theme
+theme_ed <- theme(
+  legend.position = "bottom",
+  panel.background = element_rect(fill = NA),
+  panel.border = element_rect(fill = NA, color = "grey75"),
+  axis.ticks = element_line(color = "grey85"),
+  panel.grid.major = element_line(color = "grey95", size = 0.2),
+  panel.grid.minor = element_line(color = "grey95", size = 0.2),
+  legend.key = element_blank())
+
 # Add year-month indicators
-impeachment.articles$year.month<-format(as.Date(impeachment.articles$pub_date), "%Y-%m")
+impeachment.articles$year.day<-format(as.Date(impeachment.articles$pub_date), "%d")
 
 # Count articles per month
-impeachment.permonth <-impeachment.articles %>%
-  group_by(year.month) %>%
-  summarise(monthly.articles=n())
+impeachment.perday <-impeachment.articles %>%
+  group_by(year.day) %>%
+  summarise(daily.articles=n()) %>%
+  ungroup()
 
 # Plot the trend over time
-ggplot(data = impeachment.permonth, 
-       aes(x = pub_date, y = monthly.articles)) +
+ggplot(data = impeachment.perday, 
+       aes(x = year.day, y = daily.articles)) +
   geom_point() +
-  theme_bw() + 
-  xlab(label = "Date") +
+  theme_ed + 
+  xlab(label = "Day of September 2019") +
   ylab(label = "Article Count") +
   ggtitle(label = "Coverage of Impeachment")
 ```
@@ -263,24 +285,21 @@ ggplot(data = impeachment.permonth,
 What if we take a look at coverage of something else...
 
 ```{r, eval=FALSE}
-st <- "ADD SEARCH TERMS"
-start<-"ADD DATE" 
-end<-"ADD DATE"
 
 # Get number of hits, number of page queries
-res<-nytapi(search.terms = "______________", begin.date = ________, end.date = ________)
+res<-nytapi(search.terms = "___________", begin.date = ________, end.date = ________, key=key)
 hits<-res$response$meta$hits
 print(hits)
-round(hits/10)
+total_pages <- ceiling(hits/10) %>% print()
 
 # Get all articles   
-res.articles<-sapply(X = 0:660, FUN = function(page){
+res.articles<-sapply(X = 0:total_pages, FUN = function(page){
   #cat(page, "")
   response<-tryCatch(expr = {
-    r<-nytapi(search.terms = "______________", begin.date = ________, end.date = ________, page = page)
+    r<-nytapi(search.terms = "___________", begin.date = ________, end.date = ________, page = page, key=key)
     r$response$docs
-    Sys.sleep(10) #sleep 10 seconds
   }, error=function(e) NULL)
+  Sys.sleep(10) #sleep 10 seconds
   return(response)
 })
 
@@ -314,11 +333,18 @@ For most popular APIs, the R community has created packages that format, send, a
 
 ## (Optional) Exercise 3:
 
+The NYT API is available using the following R package (you may need to downloadit from github instead of the CRAN repository): https://github.com/mkearney/nytimes
+
+```{r, eval=FALSE}
+install.packages("devtools")
+devtools::install_github("mkearney/nytimes")
+```
+
 Replicate the above analysis of impeachment stories in part 2 using the `rtimes` package. 
 
 ```{r, eval=FALSE}
 pacman::p_load(
-  rtimes #https://cran.r-project.org/web/packages/rtimes/vignettes/rtimes_vignette.html
+  nytimes #nyt api search
 )
 ```
 
