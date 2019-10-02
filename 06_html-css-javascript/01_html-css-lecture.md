@@ -21,20 +21,11 @@ Computers connected to the web are **clients** and **servers**.
 - Clients: the typical web user's internet-connected devices 
 - Servers: computers that store webpages, sites, or apps.
 
-<img src="https://mdn.mozillademos.org/files/8973/Client-server.jpg" width="200">
-
-[The TCP/IP model](https://en.wikipedia.org/wiki/Internet_protocol_suite) has 4 components (for more information, see the post by [Karl Dubost](https://dev.opera.com/articles/http-basic-introduction/)). 
-
-1. **Link** describes the access to physical media (e.g. using the network card)
-2. **Internet** describes the envelope and routing of data — how it is packaged (IP)
-3. **Transport** describes the way the data is delivered from the starting point to the final destination (TCP, UDP)
-4. **Application** describes the meaning or format of the transferred messages (HTTP)
+<img src="https://mdn.mozillademos.org/files/8973/Client-server.jpg" width="500">
 
 When using an API, we don't need to worry about how web content is organized. Since that information is provided by the API documentation (key-value pairs). As long as you know how HTTP (Hyptertext Transfer Protocol) works, then it's fine. Unfortunately, that's not the case for web scraping. 
 
-![web-history](https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Internet_Key_Layers.png/525px-Internet_Key_Layers.png)
-
-[Mozila Foundation](https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/Getting_started) have amazing tutorials on Web fundamentals. I use some of their contents for this section. 
+[Mozila Foundation](https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/Getting_started) have amazing tutorials on Web fundamentals. I use some of their contents for this section. See also [this post](https://dev.opera.com/articles/http-basic-introduction/)) by Karl Dubost.
 
 
 ## What is a Website?
@@ -53,8 +44,7 @@ The "front end" product is HTML + CSS stylesheets + Javascript
   - brings the website to life (dynamic or interactive content)
   - *.js files or code embedded in `<script>` `</script>` tags
 
-
-### This is a Website
+This is a Website
 
 ![html](img/html.png)
 
@@ -64,7 +54,12 @@ Your browser turns that into a tidy layout...
 
 Voila!
 
-## HTML: Basic Structure
+
+## HTML
+
+### Basic Structure
+
+Example structure: 
 
 ```html
 <!DOCTYPE html>
@@ -78,28 +73,14 @@ Voila!
 </html>
 ```
 
-### HTML is a Tree
+HTML is a Tree.
 
 ![tree](http://www.openbookproject.net/tutorials/getdown/css/images/lesson4/HTMLDOMTree.png)
 
 Where else have we seen a tree structure before? 
 
 
-## Document Object Model
-
-- Most modern browsers have a parser that reads in the HTML document, parses it into a DOM (Document Object Model) structure, and then renders the DOM structure.
-
-- Much like HTTP, the DOM is an agreed-upon standard.
-
-- The DOM is much more than what I've described, but for our purposes, what is most important to understand is that the text is only one part of an HTML element. (This will be important to remember when you get to writing your scrapers next week!)
-
-### Example of a Document Object Model
-
-Note that the DOM retains the tree structure: 
-![dom](http://www.cs.toronto.edu/~shiva/cscb07/img/dom/treeStructure.png)
-
-
-## HTML Elements
+### HTML Elements
 
 Generally speaking, an HTML element has three components:
 
@@ -109,14 +90,13 @@ Generally speaking, an HTML element has three components:
 
 ![elements](https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/HTML_element_structure.svg/330px-HTML_element_structure.svg.png)
 
-### HTML: Tags
+#### HTML Tags
+
+Tag syntax ([source](http://miriamposner.com/blog/wp-content/uploads/2011/11/html-handout.pdf)):
 
 ![html-tags](img/html-tags.png)
 
-<small>[Image credit](http://miriamposner.com/blog/wp-content/uploads/2011/11/html-handout.pdf)</small>
-
-Common HTML Tags
-========================================================
+Common HTML Tags:
 
 | Tag        | Meaning           | 
 | ------------- |-------------  |
@@ -129,7 +109,7 @@ Common HTML Tags
 | `<table>`,`<tr>`,`<td>`  | table, table row, table item |
 | `<div>`,`<span` | general containers |
 
-### HTML Attributes
+#### HTML Attributes
 
 - HTML elements can have attributes
 - Attributes provide additional information about an element
@@ -137,6 +117,21 @@ Common HTML Tags
 - Attributes come in name/value pairs like: name="value"
 
 ![html-attributes](img/attributes.png)
+
+
+### Document Object Model
+
+- Most modern browsers have a parser that reads in the HTML document, parses it into a DOM (Document Object Model) structure, and then renders the DOM structure.
+
+- Much like HTTP, the DOM is an agreed-upon standard.
+
+- The DOM is much more than what I've described, but for our purposes, what is most important to understand is that the text is only one part of an HTML element. (This will be important to remember when you get to writing your scrapers next week!)
+
+#### Example of a Document Object Model
+
+Note that the DOM retains the tree structure: 
+![dom](http://www.cs.toronto.edu/~shiva/cscb07/img/dom/treeStructure.png)
+
 
 
 ## CSS
@@ -150,6 +145,12 @@ Common HTML Tags
 
 ### CSS Anatomy
 
+Syntax: 
+
+![css-rule](img/css-rule-2.png)
+
+CSS 
+
 * Selectors
     - Element selector: `p`
     - Class selector:  `p class="blue"`
@@ -162,10 +163,8 @@ Common HTML Tags
 
 * Hooks
 
-***
-![css-rule](img/css-rule-2.png)
 
-## CSS + HTML
+### Example of HTML with hooks for CSS
 
 ```html
 <body>
@@ -190,6 +189,7 @@ Common HTML Tags
 </body>
 ```
 
+
 ## Javascript
 
 - Where have we seen Javascript before?
@@ -198,14 +198,10 @@ Common HTML Tags
 - Javascript is added into existing HTML code (either in head or in body)
 - JS adds actions to sites: every time you "interact" with a button, image, or graphic, or you see something change live, you're probably looking at Javascript 
 
-### Javascript Example 1 
-
 Javascript can be added explicitly in code, or by calling a separate script file (.js)
 - Added explicitly: 
 ![js-example](img/javascript-example.png)
 <small>[Image credit](https://www.w3schools.com/js/js_output.asp)</small>
-
-### Javascript Example 2
 
 Javascript can also be written as a separate script, just like we do with R (and it looks fairly similar!)
 
@@ -215,13 +211,10 @@ x = 5;
 y = 'string' // This is a string
 z = x + y; 
 ```
-What will z print? 
 
-### Return of the Javascript
+Note that Javascript can also be used in Qualtrics. 
 
-Javascript can also be used in Qualtrics. 
 
-For now, it's time for a challenge...
 
 ## Inspecting website source code 
 
