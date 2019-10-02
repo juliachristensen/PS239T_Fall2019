@@ -244,7 +244,8 @@ Google Chrome comes with great developer tools to help parse a webpage.
 
 The inspector gives you the HTML tree, as well as all the CSS selectors and style information.
 
-### Examples
+
+### Using tools 
 
 #### Example 1
 
@@ -254,13 +255,13 @@ How would we find the parts of the code for this webpage with heading text?
 
 First, inspect the source code using Google Crome or an equivilent tool. Use the 'select element' tool to click on the headings. 
 
-![inspect element ex1](img/example1-chrome-inspector.png)
+![ex1.1](img/example1-chrome-inspector.png)
 
 What patterns do you see? 
 
 Now, try using the Selector Gadget. Notice how the gadget finds patterns of code that correspond to the selected page elements. 
 
-![selector ex1](img/example1-selector-gadget.png)
+![ex1.2](img/example1-selector-gadget.png)
 
 Now repeat this process for the text of this page. What tags uniquely define the page text?
 
