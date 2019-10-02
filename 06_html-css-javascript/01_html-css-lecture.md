@@ -21,7 +21,7 @@ Computers connected to the web are **clients** and **servers**.
 - Clients: the typical web user's internet-connected devices 
 - Servers: computers that store webpages, sites, or apps.
 
-![client-server](https://mdn.mozillademos.org/files/8973/Client-server.jpg =25x)
+![client-server](https://mdn.mozillademos.org/files/8973/Client-server.jpg)
 
 [The TCP/IP model](https://en.wikipedia.org/wiki/Internet_protocol_suite) has 4 components (for more information, see the post by [Karl Dubost](https://dev.opera.com/articles/http-basic-introduction/)). 
 
@@ -255,13 +255,13 @@ How would we find the parts of the code for this webpage with heading text?
 
 First, inspect the source code using Google Crome or an equivilent tool. Use the 'select element' tool to click on the headings. 
 
-![ex1.1](img/example1-chrome-inspector.png)
+![ex1.1](img/example1-chrome-inspector.PNG)
 
 What patterns do you see? 
 
 Now, try using the Selector Gadget. Notice how the gadget finds patterns of code that correspond to the selected page elements. 
 
-![ex1.2](img/example1-selector-gadget.png)
+![ex1.2](img/example1-selector-gadget.PNG)
 
 Now repeat this process for the text of this page. What tags uniquely define the page text?
 
