@@ -23,6 +23,8 @@ Computers connected to the web are **clients** and **servers**.
 
 ![client-server](https://mdn.mozillademos.org/files/8973/Client-server.jpg)
 
+<img src="https://mdn.mozillademos.org/files/8973/Client-server.jpg" width="48">
+
 [The TCP/IP model](https://en.wikipedia.org/wiki/Internet_protocol_suite) has 4 components (for more information, see the post by [Karl Dubost](https://dev.opera.com/articles/http-basic-introduction/)). 
 
 1. **Link** describes the access to physical media (e.g. using the network card)
