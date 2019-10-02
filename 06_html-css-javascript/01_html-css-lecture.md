@@ -1,11 +1,12 @@
-Source Code for Websites: HTML, CSS, and Javascript
-========================================================
-author: PS239T
-date: Spring 2018
-autosize: TRUE
+# Source Code for Websites: HTML, CSS, and Javascript
 
-Why HTML?
-========================================================
+> ### Learning objectives
+> 
+> * understand enough HTML structure to build a scraper (next week)
+> * discern what components of a webpage are relevant to that task (CSS, HTML, Javascript) and which probably are not
+
+
+## Why HTML?
 
 Understanding the basic structure of HTML (and two other languages often used to customize websites, CSS and Javascript) allows us to: 
 
@@ -13,14 +14,30 @@ Understanding the basic structure of HTML (and two other languages often used to
 - improve the design of our own websites (you have one, right?)
 - evaluate how best to share our findings with a web-based audience 
 
-Learning Objectives
-========================================================
 
-- understand enough HTML structure to build a scraper (next week)
-- discern what components of a webpage are relevant to that task (CSS, HTML, Javascript) and which probably are not
+## How the Web Works 
 
-What is a Website?
-========================================================
+Computers connected to the web are **clients** and **servers**.
+- Clients: the typical web user's internet-connected devices 
+- Servers: computers that store webpages, sites, or apps.
+
+![client-server](https://mdn.mozillademos.org/files/8973/Client-server.jpg)
+
+[The TCP/IP model](https://en.wikipedia.org/wiki/Internet_protocol_suite) has 4 components (for more information, see the post by [Karl Dubost](https://dev.opera.com/articles/http-basic-introduction/)). 
+
+1. **Link** describes the access to physical media (e.g. using the network card)
+2. **Internet** describes the envelope and routing of data — how it is packaged (IP)
+3. **Transport** describes the way the data is delivered from the starting point to the final destination (TCP, UDP)
+4. **Application** describes the meaning or format of the transferred messages (HTTP)
+
+When using an API, we don't need to worry about how web content is organized. Since that information is provided by the API documentation (key-value pairs). As long as you know how HTTP (Hyptertext Transfer Protocol) works, then it's fine. Unfortunately, that's not the case for web scraping. 
+
+![web-history](https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Internet_Key_Layers.png/525px-Internet_Key_Layers.png)
+
+[Mozila Foundation](https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/Getting_started) have amazing tutorials on Web fundamentals. I use some of their contents for this section. 
+
+
+## What is a Website?
 
 Some combination of codebase, database
 
@@ -28,6 +45,7 @@ The "front end" product is HTML + CSS stylesheets + Javascript
 - HTML: 
   - provides the skeleton of the website (aka, the "tree")
   - starts with call to `<html>` tag, ends with `</html>` tag
+  - note that tags are case-sensitive. `<html>` not `HTML`.
 - CSS: 
   - fleshes out the website (provides color, shape, styling, etc.)
   - uses *.css files or code embedded in `<style>` `</style>` or `<link>` `</link>` tags
@@ -35,20 +53,20 @@ The "front end" product is HTML + CSS stylesheets + Javascript
   - brings the website to life (dynamic or interactive content)
   - *.js files or code embedded in `<script>` `</script>` tags
 
-This is a Website
-========================================================
+![layered-website](https://www.lifewire.com/thmb/ifaXMe5Av9OPfcUIJGyWJl0PGKI=/768x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/content-56a1462b3df78cf7726914d7.jpg)
+
+
+### This is a Website
+
 ![html](img/html.png)
 
 Your browser turns that into a tidy layout...
 
-This is What You Think a Website Is
-========================================================
 ![layout](img/layout.png)
 
 Voila!
 
-HTML: Basic Structure
-========================================================
+## HTML: Basic Structure
 
 ```html
 <!DOCTYPE html>
@@ -62,15 +80,14 @@ HTML: Basic Structure
 </html>
 ```
 
-HTML is a Tree
-========================================================
+### HTML is a Tree
 
 ![tree](http://www.openbookproject.net/tutorials/getdown/css/images/lesson4/HTMLDOMTree.png)
 
 Where else have we seen a tree structure before? 
 
-Document Object Model
-========================================================
+
+## Document Object Model
 
 - Most modern browsers have a parser that reads in the HTML document, parses it into a DOM (Document Object Model) structure, and then renders the DOM structure.
 
@@ -78,14 +95,13 @@ Document Object Model
 
 - The DOM is much more than what I've described, but for our purposes, what is most important to understand is that the text is only one part of an HTML element. (This will be important to remember when you get to writing your scrapers next week!)
 
-Example of a Document Object Model
-========================================================
+### Example of a Document Object Model
 
 Note that the DOM retains the tree structure: 
 ![dom](http://www.cs.toronto.edu/~shiva/cscb07/img/dom/treeStructure.png)
 
-HTML Elements
-========================================================
+
+## HTML Elements
 
 Generally speaking, an HTML element has three components:
 
@@ -95,8 +111,7 @@ Generally speaking, an HTML element has three components:
 
 ![elements](https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/HTML_element_structure.svg/330px-HTML_element_structure.svg.png)
 
-HTML: Tags
-========================================================
+### HTML: Tags
 
 ![html-tags](img/html-tags.png)
 
@@ -116,8 +131,7 @@ Common HTML Tags
 | `<table>`,`<tr>`,`<td>`  | table, table row, table item |
 | `<div>`,`<span` | general containers |
 
-HTML Attributes
-========================================================
+### HTML Attributes
 
 - HTML elements can have attributes
 - Attributes provide additional information about an element
@@ -126,8 +140,8 @@ HTML Attributes
 
 ![html-attributes](img/attributes.png)
 
-CSS
-========================================================
+
+## CSS
 
 - CSS = Cascading Style Sheet. 
 - CSS defines how HTML elements are to be displayed
@@ -136,8 +150,7 @@ CSS
 - Most web designers litter the HTML markup with tons of `class`s and `id`s to provide "hooks" for their CSS.
 - You can piggyback on these to jump to the parts of the markup that contain the data you need.
 
-CSS Anatomy
-========================================================
+### CSS Anatomy
 
 * Selectors
     - Element selector: `p`
@@ -154,8 +167,7 @@ CSS Anatomy
 ***
 ![css-rule](img/css-rule-2.png)
 
-CSS + HTML
-========================================================
+## CSS + HTML
 
 ```html
 <body>
@@ -180,8 +192,7 @@ CSS + HTML
 </body>
 ```
 
-Javascript
-========================================================
+## Javascript
 
 - Where have we seen Javascript before?
   - .json = **J**ava**s**cript **O**bject **N**otation
@@ -189,16 +200,14 @@ Javascript
 - Javascript is added into existing HTML code (either in head or in body)
 - JS adds actions to sites: every time you "interact" with a button, image, or graphic, or you see something change live, you're probably looking at Javascript 
 
-Javascript Example 1 
-========================================================
+### Javascript Example 1 
 
 Javascript can be added explicitly in code, or by calling a separate script file (.js)
 - Added explicitly: 
 ![js-example](img/javascript-example.png)
 <small>[Image credit](https://www.w3schools.com/js/js_output.asp)</small>
 
-Javascript Example 2
-========================================================
+### Javascript Example 2
 
 Javascript can also be written as a separate script, just like we do with R (and it looks fairly similar!)
 
@@ -210,24 +219,26 @@ z = x + y;
 ```
 What will z print? 
 
-Return of the Javascript
-========================================================
+### Return of the Javascript
 
-We'll come back to Javascript when we get to Qualtrics, in a few weeks!
+Javascript can also be used in Qualtrics. 
 
 For now, it's time for a challenge...
 
-Assemble Your Tools
-========================================================
+## Inspecting website source code 
 
-1. Get the [Selector Gadget](http://selectorgadget.com/)
+### Assemble Your Tools
+
+1. Get [Google Chrome](https://www.google.com/chrome/)
+2. Get the [Selector Gadget](http://selectorgadget.com/)
     - this is a Chrome extension that lets us select everything on a page of a certain type (typically, by looking for objects of the same class)
-2. Head to the [New York Times](http://www.nytimes.com/)
-3. Prepare your right fingers (aka, find your right-click functionality using a mouse or trackpad!)
+
+### Selector Gadget 
+
+Selector Gadget is a Chrome extension that lets us select everything on a page of a certain type (typically, by looking for objects of the same class). We can use this extension to identify what CSS selectors 
 
 
-Inspect Element
-========================================================
+### Inspect Element
 
 Google Chrome comes with great developer tools to help parse a webpage.
 
@@ -235,8 +246,16 @@ Google Chrome comes with great developer tools to help parse a webpage.
 
 The inspector gives you the HTML tree, as well as all the CSS selectors and style information.
 
-Challenges
-========================================================
+### Example 
+
+
+
+
+******************************************
+
+## Challenges
+
+Go to the NYT 
 
 1. What tags uniquely define the byline? What is the CSS selector for the byline? 
 
