@@ -53,8 +53,6 @@ The "front end" product is HTML + CSS stylesheets + Javascript
   - brings the website to life (dynamic or interactive content)
   - *.js files or code embedded in `<script>` `</script>` tags
 
-![layered-website](https://www.lifewire.com/thmb/ifaXMe5Av9OPfcUIJGyWJl0PGKI=/768x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/content-56a1462b3df78cf7726914d7.jpg)
-
 
 ### This is a Website
 
@@ -246,7 +244,38 @@ Google Chrome comes with great developer tools to help parse a webpage.
 
 The inspector gives you the HTML tree, as well as all the CSS selectors and style information.
 
-### Example 
+### Examples
+
+#### Example 1
+
+Let's say that we want to scrape the headings on this page. We would first need to identify the parts of the source code that contain text for headings. 
+
+How would we find the parts of the code for this webpage with heading text? 
+
+First, inspect the source code using Google Crome or an equivilent tool. Use the 'select element' tool to click on the headings. 
+
+![inspect element ex1](img/example1-chrome-inspector.png)
+
+What patterns do you see? 
+
+Now, try using the Selector Gadget. Notice how the gadget finds patterns of code that correspond to the selected page elements. 
+
+![selector ex1](img/example1-selector-gadget.png)
+
+Now repeat this process for the text of this page. What tags uniquely define the page text?
+
+Lastly, let's change the style for this page using Google's inspect elements tool. How could we change the block quote color to red? What happens when we refresh the page? 
+
+
+#### Example 2
+
+Go to the webpage for [today's print copy of the Washington Post](https://www.washingtonpost.com/todays_paper/updates/). 
+
+How would we find the parts of the code for this webpage with article titles? What about article authors (bylines)? 
+
+First, inspect the source code using Google Crome or an equivilent tool. Use the 'select element' tool to click on the headings. Then, use the Selector Gadget to finds patterns of code that correspond to the selected page elements. 
+
+Now, let's try the same procedure to identify headlines on the [Washington Post's homepage](https://www.washingtonpost.com/). Would it be easier or harder to identify all headlines on the homepage?  
 
 
 
@@ -255,7 +284,7 @@ The inspector gives you the HTML tree, as well as all the CSS selectors and styl
 
 ## Challenges
 
-Go to the NYT 
+Go to the NYT page for [today's paper](https://www.nytimes.com/section/todayspaper). 
 
 1. What tags uniquely define the byline? What is the CSS selector for the byline? 
 
@@ -263,7 +292,7 @@ Go to the NYT
 
 3. Using the styles tab in your inspector, change all headlines to a "blueviolet" color. Change the page background color to "bisque."
 
-4. Change the font size of the summaries to be smaller. Change the font family of the text for the summaries. Then, change it for the entire page.
+4. (Optional) Change the font size of the summaries to be smaller. Change the font family of the text for the summaries. Then, change it for the entire page.
 
 5. What tags define links to the articles?
 
