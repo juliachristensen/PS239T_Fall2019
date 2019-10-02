@@ -21,9 +21,7 @@ Computers connected to the web are **clients** and **servers**.
 - Clients: the typical web user's internet-connected devices 
 - Servers: computers that store webpages, sites, or apps.
 
-![client-server](https://mdn.mozillademos.org/files/8973/Client-server.jpg)
-
-<img src="https://mdn.mozillademos.org/files/8973/Client-server.jpg" width="48">
+<img src="https://mdn.mozillademos.org/files/8973/Client-server.jpg" width="200">
 
 [The TCP/IP model](https://en.wikipedia.org/wiki/Internet_protocol_suite) has 4 components (for more information, see the post by [Karl Dubost](https://dev.opera.com/articles/http-basic-introduction/)). 
 
