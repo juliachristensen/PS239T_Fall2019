@@ -25,11 +25,11 @@ from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException
 #set working directory
 
-os.chdir(r'C:\Users\anust\Dropbox\Mac\Documents\Courses\PS239_T\Examples')
+os.chdir(r'C:/Users/Julia/OneDrive/Documents/Berkeley/2019-08_Fall/PS239T_Fall2019/07_webscraping')
 
 
 ##select the chrome webdriver
-path_to_chromedriver = "C:\\Users\\anust\\Documents\\Download_Data\\chromedriver_win32_latest\\chromedriver.exe"
+path_to_chromedriver = "C:/Users/Julia/OneDrive/Documents/Berkeley/2019-08_Fall/PS239T_Fall2019/07_webscraping/chromedriver.exe"
 chromeOptions = webdriver.ChromeOptions()
 browser = webdriver.Chrome(executable_path = path_to_chromedriver,port=0,chrome_options=chromeOptions, service_args=None, desired_capabilities=None, service_log_path=None)
 

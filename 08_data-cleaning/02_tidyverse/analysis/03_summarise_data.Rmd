@@ -1,0 +1,165 @@
+---
+title: 'Data Analysis in R: Lecture Notes'
+author: "PS239T"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    df_print: paged
+    theme: flatly
+    highlight: pygments
+---
+
+# 0) NOTES
+
+Purpose of document is to clean dataset of Florida police shootings from 2009 to 2014. 
+
+See github page for more information about dataset: https://github.com/tbtimes/florida-police-shooting-data
+
+
+
+**********************************************************
+
+# 1) SET UP 
+
+## 1.1. General 
+
+```{r}
+# remove all objects
+rm(list=ls())
+
+# Unload all packages 
+library(pacman)
+pacman::p_unload(all)
+
+# Add packages 
+pacman::p_load(
+  tidyverse, #dplyr, readr, etc.
+  data.table, #fread() 
+  foreign, #load data types including stata .dta files 
+  magrittr, #%<>% operator
+  skimr, #for summerising
+  kable, #pretty tables
+  stargazer, #pretty tables 
+  xtable #pretty tables 
+)
+```
+
+## 1.2. Load Data 
+
+```{r}
+load("../data/fl_shooting_data_clean.RData")
+```
+
+**********************************************************
+
+# 2) SUMMARISE DATA
+
+What do you want to summarise? 
+
+```{r}
+
+```
+
+
+
+**********************************************************
+
+# 3) FUNCTIONS 
+
+Writing functions using dplyr and other tidyverse funtions is similar to writing other functions in R. However, functions with variable names as arguments (e.g. x in the function below) can be difficult because some dplyr functions do not recognize character variable names. For functions with this issue (e.g. group_by), dplyr has an alternative version of the function with a '_' following the function name. 
+```{r}
+freqTable <- function(datName,x){
+  datName %>% 
+    group_by_(x) %>% 
+    summarise(total=n(),
+              pct=round(total/sum(total)*100,1)) %>% 
+    arrange(desc(total)) %>%
+    print()
+}
+
+freqTable(fl_shootings,'weapon_choices')
+```
+
+More generally, you can run any R code saved as a character string `t` using `eval(parse(text=t))`:
+```{r}
+freqTable <- function(datName,x){
+  # Group by x
+  txt <- paste0("datName %<>% group_by(",x,")") 
+  eval(parse(text=txt))
+  
+  # Summarize and arrange data 
+  datName %>% 
+    summarise(total=n(),
+              pct=round(total/sum(total)*100,1)) %>% 
+    arrange(desc(total)) %>%
+    print()
+}
+
+freqTable(fl_shootings,'weapon_choices')
+```
+
+
+**********************************************************
+
+# 4) RESHAPING 
+
+```{r}
+# Frequency of weapons 
+weapon_by_year <- fl_shootings %>% 
+  group_by(weapon_choices, year) %>% 
+  summarise(total=n()) %>%
+  print() 
+
+# Spread out totals by year 
+weapon_by_year %>% 
+  spread(key=year, value=total)
+
+# Restack data 
+weapon_by_year %>% 
+  spread(key=year, value=total) %>%
+  gather(key=year, value=total, -weapon_choices)
+```
+
+# 5) PRETTY TABLES
+
+## 5.1. Kable 
+
+```{r}
+# Frequency of weapons 
+fl_shootings %>% 
+  group_by(weapon_choices) %>% 
+  summarise(total=n()) %>%
+  kable 
+```
+
+## 5.2. Stargazer 
+
+Descriptive stats
+```{r}
+# Create example regression & print default output 
+lm1 <- lm(number_of_shots ~ black + other_race, data=fl_shootings) %>% print() 
+
+# Summary function 
+lm1 %>% summary() 
+
+# Generate and save text version of stargazer output 
+lm1 %>% stargazer(type = "text", title="OLS Example", digits=3,  
+                  out="../output/table1.txt")
+
+# Generate LaTex version of stargazer output 
+lm1 %>% stargazer()
+```
+
+```{r}
+# Frequency of weapons 
+fl_shootings %>% 
+  group_by(weapon_choices) %>% 
+  summarise(total=n()) %>%
+  xtable
+
+```
+
+

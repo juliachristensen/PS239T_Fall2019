@@ -1,0 +1,134 @@
+---
+title: 'Data Analysis in R: Lecture Notes'
+author: "PS239T"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    df_print: paged
+    theme: flatly
+    highlight: pygments
+---
+
+# 0) NOTES
+
+Purpose of document is to download, save, and combine raw .csv files of Florida police shootings from 2009 to 2014. 
+
+See github page for more information about dataset: https://github.com/tbtimes/florida-police-shooting-data
+
+
+
+**********************************************************
+
+# 1) SET UP 
+
+## 1.1. General 
+
+```{r}
+# remove all objects
+rm(list=ls())
+
+# Unload all packages 
+library(pacman)
+pacman::p_unload(all)
+
+# Add packages 
+pacman::p_load(
+  tidyverse, #dplyr, readr, etc.
+  data.table, #fread() 
+  foreign, #load data types including stata .dta files 
+  magrittr, #%<>% operator
+  skimr #for summerising
+)
+```
+
+## 1.2. Check wd
+
+Make sure that your working directory is PS239T_Fall2019/08_data-cleaning/02_tidyverse/analysis
+```{r}
+getwd()
+```
+
+
+**********************************************************
+
+# 2) DOWNLOAD DATA
+
+## 2.1. Download Data 
+```{r}
+root_url <- "https://raw.githubusercontent.com/tbtimes/florida-police-shooting-data/master/"
+
+# Read csv of florida police shootings "cases.csv"
+cases <- read_csv(paste0(root_url, "cases.csv")) 
+
+# Read csv of florida police shootings "cities.csv"    
+cities <- read_csv(paste0(root_url, "cities.csv")) 
+
+# Read csv of florida police shootings "peopleshot.csv" 
+people <- read_csv(paste0(root_url, "peopleshot.csv")) 
+```
+
+## 2.2. Save Raw Data
+```{r}
+save(cases, cities, people, 
+     file="../data/raw/fl_shooting_data_raw.RData")
+```
+
+
+**********************************************************
+
+# 3) COMBINE DATASETS
+
+## 3.1. Standardize data
+
+### 3.1.1. Look at data 
+```{r}
+cases %>% glimpse()
+```
+
+```{r}
+cities %>% glimpse()
+```
+
+```{r}
+people %>% glimpse()
+```
+
+### 3.1.2. Standardize id and name vars
+```{r}
+# Clarify case id 
+cases %<>% rename(case_id = id) 
+
+# Clarify city id and city name vars
+cities %<>% 
+  rename(city_id = id) %>%
+  rename(city_name = name)
+```
+
+## 3.2. Join datasets 
+```{r}
+# Start with people as the base dataset and add 
+fl_shootings <- people
+
+# Add columns with data from cases, matching on 'case_id' variable 
+fl_shootings <- left_join(x = fl_shootings,
+                          y = cases,
+                          by = "case_id")
+
+# Add column with city names from cities, matching on 'city_id' variable 
+fl_shootings <- left_join(x = fl_shootings,
+                          y = cities,
+                          by = "city_id")
+```
+
+## 3.3. Save combined data
+```{r}
+save(fl_shootings, file="../data/fl_shooting_data.RData")
+```
+
+
+
+
+
