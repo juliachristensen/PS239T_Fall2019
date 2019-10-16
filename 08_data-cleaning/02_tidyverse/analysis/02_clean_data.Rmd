@@ -123,7 +123,7 @@ fl_shootings %>% group_by(weapon_choices) %>% summarise(n=n())
 fl_shootings %<>%
   mutate(weapon_cat = NA) %>%
   mutate(weapon_cat = ifelse(weapon_choices %in% c("Firearm"), "Gun", weapon_cat),
-         weapon_cat = ifelse(weapon_choices %in% c("Blade/stabbing implement"), "Bbade", weapon_cat),
+         weapon_cat = ifelse(weapon_choices %in% c("Blade/stabbing implement"), "blade", weapon_cat),
          weapon_cat = ifelse(weapon_choices %in% c("Blunt/bludgeoning weapon"), "blunt", weapon_cat),
          weapon_cat = ifelse(weapon_choices %in% c("BB/Pellet Gun", "Taser"), "nonlethal", weapon_cat),
          weapon_cat = ifelse(weapon_choices %in% c("Other", "Unclear from report"), "other", weapon_cat),

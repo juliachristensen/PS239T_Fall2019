@@ -60,7 +60,20 @@ load("../data/fl_shooting_data_clean.RData")
 What do you want to summarise? 
 
 ```{r}
+fl_shootings %>% glimpse()
 
+fl_shootings %>% 
+  group_by(race) %>%
+  summarise(avg=mean(fatality, na.rm=T),
+            sd=sd(fatality, na.rm=T))
+
+fl_shootings %>% 
+  summarise_if(is.numeric, mean, na.rm=T)
+
+fl_shootings %>% 
+  group_by(city_name, weapon_cat) %>%
+  summarise(n=n()) %>%
+  spread(key=weapon_cat, value=n)
 ```
 
 
@@ -71,11 +84,11 @@ What do you want to summarise?
 
 Writing functions using dplyr and other tidyverse funtions is similar to writing other functions in R. However, functions with variable names as arguments (e.g. x in the function below) can be difficult because some dplyr functions do not recognize character variable names. For functions with this issue (e.g. group_by), dplyr has an alternative version of the function with a '_' following the function name. 
 ```{r}
-freqTable <- function(datName,x){
+freqTable <- function(datName, x){
   datName %>% 
     group_by_(x) %>% 
     summarise(total=n(),
-              pct=round(total/sum(total)*100,1)) %>% 
+              pct=round(total/nrow(datName)*100,1)) %>% 
     arrange(desc(total)) %>%
     print()
 }
@@ -137,7 +150,6 @@ fl_shootings %>%
 
 ## 5.2. Stargazer 
 
-Descriptive stats
 ```{r}
 # Create example regression & print default output 
 lm1 <- lm(number_of_shots ~ black + other_race, data=fl_shootings) %>% print() 
@@ -159,7 +171,6 @@ fl_shootings %>%
   group_by(weapon_choices) %>% 
   summarise(total=n()) %>%
   xtable
-
 ```
 
 
