@@ -15,8 +15,6 @@ of particular quotations or events that support one’s arguments
 
 ## Choosing visualization type
 
-Look at the following [quick reference guide](http://experception.net/Franconeri_ExperCeptionDotNet_DataVisQuickRef.pdf).
+![graphref](img/Franconeri_ExperCeptionDotNet_DataVisQuickRef.png).
 
 Source: http://experception.net/Franconeri_ExperCeptionDotNet_DataVisQuickRef.pdf
-
-![graphref](img/Franconeri_ExperCeptionDotNet_DataVisQuickRef.png).
