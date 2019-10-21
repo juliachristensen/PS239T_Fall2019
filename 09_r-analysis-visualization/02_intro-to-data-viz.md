@@ -18,3 +18,5 @@ of particular quotations or events that support one’s arguments
 Look at the following [quick reference guide](http://experception.net/Franconeri_ExperCeptionDotNet_DataVisQuickRef.pdf).
 
 Source: http://experception.net/Franconeri_ExperCeptionDotNet_DataVisQuickRef.pdf
+
+![graphref](img/Franconeri_ExperCeptionDotNet_DataVisQuickRef.png).
