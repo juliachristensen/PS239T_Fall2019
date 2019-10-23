@@ -245,6 +245,7 @@ ggplot(data = dat, aes(x = gdpPercap, y = lifeExp, color=continent)) +
   stat_smooth(method="lm")
 ```
 
+
 Note that we currently have 5 lines, one for each region, because the **color** option is the global `aes` function.. But if we move it, we get different restuls:
 
 ```{r}
@@ -280,11 +281,14 @@ Hint: do not use the first `aes` function.
 Earlier we visualised the change in life expectancy over time across all countries in one plot. Alternatively, we can split this out over multiple panels by adding a layer of **facet** panels:
 
 ```{r}
-ggplot(data = dat, aes(x = year, y = lifeExp, color=country)) +
-  geom_line() + 
-  facet_wrap( ~ continent) + 
-  theme(legend.position="none") 
-  # I've removed the legend here so that the charts themselves will be visible. 
+dat %>%
+  mutate(continent=factor(continent, 
+                          levels=c("Africa", "Oceania", "Americas", "Asia", "Europe"))) %>%
+  ggplot(aes(x = year, y = lifeExp, color=country)) +
+    geom_line() + 
+    facet_wrap( ~ continent) + 
+    theme(legend.position="none") 
+    # I've removed the legend here so that the charts themselves will be visible. 
 ```
 
 ### 1.8. Colors 
@@ -404,7 +408,23 @@ Advanced:
 
 **Exporting with ggplot**
 
+Basic syntax:
 ```{r, eval=FALSE}
 # Assume we saved our plot is an object called example.plot
-ggsave(filename="../Output/example-ggplot.pdf", plot=example.plot, scale=, width=, height=)
+ggsave(filename="../Output/example-ggplot.pdf", 
+       plot=example.plot, scale=, width=, height=)
+```
+
+Example: 
+```{r}
+ggplot(data = dat, aes(x = gdpPercap, y = lifeExp)) + 
+  geom_point(color="grey50", alpha=.5) + 
+  scale_x_log10() + 
+  stat_smooth(method="lm", size = 1.5, alpha=.75) + 
+  scale_colour_viridis_d(option="D") +
+  theme_ed
+
+ggsave(filename="../Output/example-ggplot.pdf", 
+       plot=last_plot() #default
+       )
 ```

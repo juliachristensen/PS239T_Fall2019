@@ -30,7 +30,7 @@ Note that other plotting facilities do exist (notably **lattice**), but base and
 
 ### 0.1. Setup environment
 
-```{r, eval=F}
+```{r}
 # remove all objects
 rm(list=ls())
 
@@ -38,7 +38,7 @@ rm(list=ls())
 getwd()
 
 # Change default plot dimensions
-knitr::opts_chunk$set(fig.width=12, fig.height=8)
+knitr::opts_chunk$set(fig.width=10, fig.height=6)
 ```
 
 ### 0.2. The dataset
@@ -55,6 +55,7 @@ dat <- read.csv("../Data-raw/gapminder-FiveYearData.csv")
 ```{r, eval=F}
 plot(x=)
 ```
+
 ```{r}
 # Note that when asked to plot a single vector, R will assume the index positions of each vector element are the implied horizontal dimension
 plot(x = dat$lifeExp) 
@@ -65,6 +66,7 @@ plot(x = dat$lifeExp)
 ```{r, eval=F}
 plot(x=, y=)
 ```
+
 ```{r}
 plot(x = dat$gdpPercap, y = dat$lifeExp)
 ```
@@ -244,18 +246,41 @@ Two basic image types
 
 Every pixel of a plot contains its own separate coding; not so great if you want to resize the image. In other words, if you expect to do resizing, or the chart might be displayed at a very different size than what you see on your screen (e.g., a conference presentation), you probably don't want these formats. 
 
-```{r, eval=FALSE}
+Basic syntax: 
+```{r, eval=F}
 jpeg(filename="../Output/example.png", width=, height=)
 plot(x,y)
 dev.off()
 ```
 
+Example: 
+```{r}
+jpeg(filename="../Output/example1.png")
+  # plot the line
+  plot(x = dat$gdpPercap, y = dat$lifeExp, type="p")
+  # now the guides
+  abline(v=40000, h=75, lty=2)
+dev.off()
+```
+
+
 ### 2.2. **Vector** (.pdf, .ps)
 
 Every element of a plot is encoded with a function that gives its coding conditional on several factors; great for resizing (presentations, etc.). 
 
+Basic syntax: 
 ```{r, eval=FALSE}
 pdf(filename="../Output/example.pdf", width=, height=)
 plot(x,y)
+dev.off()
+```
+
+Example: 
+```{r}
+pdf("../Output/example1.pdf")
+  # plot the line
+  plot(x = dat$gdpPercap, y = dat$lifeExp, type="p")
+  # now the guides
+  abline(v=40000, h=75, lty=2)
 dev.off()
 ```
