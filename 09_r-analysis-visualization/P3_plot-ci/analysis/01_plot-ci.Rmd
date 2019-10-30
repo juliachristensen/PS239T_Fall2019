@@ -34,7 +34,8 @@ pacman::p_load(
   viridis, #great colors
   MASS, #boston dataset
   broom, #tidy() function
-  sandwich, lmtest #robust se 
+  sandwich, lmtest, #robust se 
+  skimr #summarising data
 )
 ```
 

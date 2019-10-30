@@ -65,7 +65,7 @@ setwd("../Data_Raw/Shapefile/")
 US_counties <- rgdal::readOGR(dsn=".",layer="gz_2010_us_050_00_5m",
                               stringsAsFactors=FALSE)
 ```
-Specifically, This is the 2010 Census shapefile. Other Shapefiles can be found here: https://www.census.gov/geo/maps-data/data/cbf/cbf_counties.html
+Specifically, This is the 2010 Census shapefile. Other Shapefiles can be found here: https://www.census.gov/geo/maps-data/data/cbf/cbf_counties.html.
 
 ## 2.4. Exploring Shapefile 
 Now, let's check a few things-the class of the object we just read into R, its dimensions, and plotting it.

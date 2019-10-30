@@ -1,0 +1,609 @@
+---
+title: "Let’s Learn Networks"
+author: "Tim Marple"
+date: "October 30th, 2019"
+output: 
+  html_document:
+    number_sections: false
+    toc: true
+    toc_float: 
+      collapsed: true
+      smooth_scroll: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# An Introduction to Social Network Analysis
+
+The goal of this document is to offer you a brief introduction to network analysis for political and social science research. This suite of tools is enormously broad, and so what we will cover today serves only as a foundation for extending into more nuanced approaches. In this introduction we will cover the basics of: 
+
+  1. Reading and manipulating different kinds of network data;
+  2. Plotting networks with different layouts and formatting;
+  3. Generating basic network statistics for descriptive inference; 
+  4. Simple community detection algorithms for network objects; and 
+  5. Briefly reviewing extended statistical analyses for network objects. 
+
+***
+  
+## Starting with the Basics
+
+There are a number of R packages for network analysis, including: igraph, SNA, network, ergm, and others. Today we will work with my preferred package, igraph. What you will learn about network data structures will allow you to move between these different packages, with some minimal effort, as each offers a different collection of strengths and tools.
+
+```{r,message=FALSE}
+rm(list=ls())
+# install.packages("igraph")
+# install.packages("igraphdata")
+library(igraph)
+library(igraphdata)
+setwd("~/Desktop/Learning Networks/")
+```
+
+***
+
+# A Simple One-Mode Network with an Edgelist: Cross-Border Banking Data
+
+We can build a basic network object using an edgelist. Recall, this data structure is a list of node-pairs which have an observed relationship, and typically includes information on the magnitude of that relationship. For an introduction, we'll start with data on cross-border banking flows between countries, from 1978 to 2014. 
+
+***
+
+## Loading the Data and Building the Network
+
+These data are structured to report net surplus flows between two states, and thus only include directed relationships where net capital flows from one country's banking sector to the other in a single year:
+
+```{r}
+load("banking_edgelist.RData")
+head(bank_edge)
+```
+
+The net surplus flow values are logged, and the edgelist reports each observed dyad yearly. Let's pick a fun year (I don't know, why not 1990?) and see where it takes us when we build the network object:
+
+```{r}
+bank_edge_y<-bank_edge[which(bank_edge$year==1990),c(1:2,4)] #Subset edgelist to relevant year
+bank_net<-graph.data.frame(bank_edge_y,directed=T) #Build network object from subset edgelist
+bank_net
+```
+
+Woo! We now have a network object in our environment reporting directed surplus flow relationships between states' banking sectors for the year 2007. Here are a few basic commands for getting the number of nodes and edges, respectively, from a network object: 
+
+```{r}
+vcount(bank_net) #Vertex (node) count
+ecount(bank_net) #Edge count 
+```
+
+What else can we do with this, you might ask? Many things! Let's start by taking actually visualizing the network:
+
+***
+
+## Generating Some Visuals
+
+One of the best parts about network analysis is the ability to visualize social spaces. However, doing it right can be tricky. This section will introduce:
+
+  1. The basic plotting function;
+  2. An improved, custom plotting function;
+  3. Thinning networks for closer looks; and
+  4. Adding colors to your nodes.
+
+***
+
+### The Very Boring Basic Plot
+
+So anyone can take a network object and toss it into a plotting function...
+
+```{r,out.width = '100%',out.height='100%'}
+plot(bank_net)
+```
+
+... but it doesn't come out great. Ever heard the term 'hairball plot'? This is what they mean. Without a nicer plotting code, any network image will be quite ugly. 
+
+***
+
+### A Function for Better Plots
+
+Let's build a network plotting function to use throughout the script that produces much lovelier images. We'll allow for inputs on the network, whether we want vertex size variance and labels, whether to visualize edge weight by width, layout specifications, and a title:
+
+```{r,out.width = '100%',out.height='100%'}
+net_plot<-function(network,sizes=T,labels=F,weight_width=F,layout,title){
+  if(labels==T){vnames<-V(network)$name} #T: label with names
+  else {vnames<-rep(NA,vcount(network))} #F: no labels at all
+  if(weight_width==T){width<-log(E(network)$weight)+1} #T: diff edge widths
+  else (width<-0.2) #F: fixed (thin) edge widths
+  if(sizes==T){V(network)$size<-10*degree(network,normalized=T)} 
+  else {V(network)$size<-5} #T: degree-weighted size; F: fixed (small) size
+  plot(network,vertex.label=vnames,edge.arrow.size=0.05,
+       edge.curved=seq(-0.5,0.5,length=ecount(network)),
+       edge.width=width,layout=layout,main=title)
+}
+net_plot(bank_net,layout=layout_with_fr(bank_net),
+         title="Banking Surplus Flows: 1990")
+```
+
+Now that's much nicer than the first one, but still a little heavy. As in most large network objects, it can be helpful to clear out some of the smaller, or theoretically less relevant edges to get a closer (or different) look.
+
+***
+
+### Thinning Your Network
+
+What if we want to only observe relationships with weights above a particular threshold? We call this *thinning* in network analysis. The following code (i) removes edges below a set weight threshold, (ii) deletes nodes which no longer have ties as a result of that thinning, and (iii) plots our newly thinned network:
+
+```{r,out.width = '100%',out.height='100%'}
+threshold<-6 #Set threshold for edge deletion
+#Remove edges with bracket and which() referencing by weight and threshold#
+bank_net_thin<-delete.edges(bank_net,E(bank_net)[which(E(bank_net)$weight<threshold)])
+#Remove nodes with bracket and which() reference by degree (we review this later)#
+bank_net_thin<-delete.vertices(bank_net_thin,V(bank_net_thin)[which(degree(bank_net_thin)==0)])
+net_plot(bank_net_thin,layout=layout_with_fr(bank_net_thin),
+         title="Thinned Banking Surplus Flows: 1990")
+```
+
+***
+
+### Colors!
+
+Maybe we'd like to highlight a particular (set of) node(s) in our visuals. We can do this by coloring in nodes, either by name or by type. The logic is the same, with regard to node referencing in a network object; let's color in the US and UK:
+
+```{r,out.width = '100%',out.height='100%'}
+name_col<-c("United States","United Kingdom") #Vector of names to highlight
+#Assign color to specific nodes with bracket and which() referencing#
+V(bank_net_thin)$color[V(bank_net_thin)$name %in% name_col]<-"purple" 
+net_plot(bank_net_thin,layout=layout_with_fr(bank_net_thin),
+         title="Thinned Banking Surplus Flows (US & UK): 1990")
+```
+
+Let's also try highlighting nodes with top 5% of brokerage:
+
+```{r,out.width = '100%',out.height='100%'}
+#Distributional threshold for betweenness in top 5%#
+bet_thresh<-quantile(betweenness(bank_net_thin),0.95)
+#Bracket and which() referencing on score and threshold to color# 
+V(bank_net_thin)$color[betweenness(bank_net_thin) > bet_thresh]<-"blue"
+net_plot(bank_net_thin,layout=layout_with_fr(bank_net_thin),
+         title="Thinned Banking Surplus Flows (High Brokerage): 1990")
+```
+
+There is of course, *much* more we can do with network plotting - we'll get there. But, this is only an image, after all. It gives us little in the ways of inference. What can we learn from this in terms of descriptive statistics?
+
+***
+
+## Extracting Numbers from Your Network
+
+There are two classes of descriptive statistics one can initially gather from a network. The first pertains to node-level attributes, such as measures of centrality. The second pertains to topological indicators about the network as a whole, with measures like density and centralization. We'll briefly review each in the context of 1990 banking surplus flows.
+
+***
+
+### Node Measures
+
+Sometimes we want to know information about an actor's position within a network. Today we'll cover three positional measures:
+
+  1. Basic Degree Centrality
+  2. Normalized Degree Centrality
+  3. Grab Bag: Eigenvector, Betweenness, and Constraint
+
+***
+
+#### Basic Degree Centrality
+
+The most basic measure for nodes, which is the foundation for the majority of all others, is *degree centrality*. This is, literally, just the number of relationships a node has in the network. It can be separated out into in-degree (relationships pointing in) and out-degree (relationships pointing out) as well. Let's quickly take a peek at these values in our network:
+
+```{r,out.width = '100%',out.height='100%'}
+degDF<-data.frame(Name=V(bank_net)$name,
+                  Deg_All=degree(bank_net),
+                  Deg_In=degree(bank_net,mode="in"),
+                  Deg_Out=degree(bank_net,mode="out"),
+                  row.names = NULL)
+head(degDF,15)
+hist(degDF$Deg_All,breaks="FD",xlab="Degree",
+     main="Degree Distribution: 1990 Banking Network")
+```
+
+What wonders! We can get a census of this value for all nodes in the network, with a snap of our keyboard-typing fingers. Pure magic. As you can see from the histogram, degree follows a power distribution, which is common across a broad number of networks in the world (see: Barabasi and preferential attachment for higher level explorations of this dynamic). 
+
+***
+
+#### Normalized Degree Centrality
+
+Maybe raw scores don't mean much to us though, and we'd rather see the normalized values. This simply takes the degree score and normalizes it by the total possible degree score - it's thus perfectly collinear but gives us a different sense of centrality:
+
+```{r}
+degDFn<-data.frame(Name=V(bank_net)$name,
+                   Deg_All=degree(bank_net,normalized=T),
+                   Deg_In=degree(bank_net,mode="in",normalized=T),
+                   Deg_Out=degree(bank_net,mode="out",normalized=T),
+                   row.names = NULL)
+head(degDFn,15)
+```
+
+***
+
+#### Grab Bag: Other Interesting Indicators
+
+Beyond these, there are a few more measures you may be interested in:
+
+  - Eigenvector centrality: degree centrality, weighted by centrality of closest neighbors (leading eigenvector weighting);
+  - Constraint: measure of redundancy of connections in node's immediate ego-network; and
+  - Betweenness: measure of the number/proportion of shortest paths between nodes in a network on which a given node sits.
+  
+Let's collect those all and take a quick peek at them:
+
+```{r,message=FALSE}
+degDFo<-data.frame(Name=V(bank_net)$name,
+                   EV_Cent=evcent(bank_net)$vector,
+                   Constraint=constraint(bank_net),
+                   BetweenN=betweenness(bank_net),
+                   BetweenP=betweenness(bank_net,normalized=T),
+                   row.names=NULL)
+head(degDFo,15)
+```
+
+As you may be thinking, these are typically highly correlated indicators:
+
+```{r,message=FALSE,out.width = '60%',out.height='60%',message=F}
+# install.packages("corrplot")
+library(corrplot)
+degDF<-cbind(degDFn[,2:4],degDFo[,2:5])
+corrplot(cor(degDF),method="circle")
+round(cor(degDF),2)
+```
+
+These are the basic node-level descriptive statistics you can use as building blocks for applied network analysis in your projects. Importantly, you should *not* plug all of them in as covariates (that was a bit of a hint-cough with the correlation table). Rather, choose the one(s) which most closely align with your theoretical ideas about why network position matters (is it centrality? brokerage? constraint?) and use that in your statistical models (with caution) to draw inferences.
+
+***
+
+### Topology Measures
+
+Let's explore a few topology measures of networks. Unlike node-level measures, which offer information on nodes positions within the broader network, these indicators describe features of the network as a whole. In this brief introduction we'll review three relevant measures:
+
+  1. Density
+  2. Centralization
+  3. Path Lengths
+
+***
+
+#### Density
+  
+Density tells us the relative proportion of ties observed in a network to the total number possible. In an undirected network, this is given $\frac{n(n-1)}{2}$; in a directed network it is simply $n(n-1)$, where $n$ is the number of nodes in a network. In a network with 200 nodes, for example, the total possible number of undirected ties is 19,900. Quite often, the propensity for ties in a network is theoretically informative; in our banking network it can give us a sense of how globalized cross-border capital flows are in a year. 
+
+```{r}
+graph.density(bank_net)
+```
+
+As we can see, this is quite low; only 5.5% of possible ties are exhibited in 1990. Notice we can get the same measure manually:
+
+```{r}
+ecount(bank_net)/(vcount(bank_net)*(vcount(bank_net)-1))
+```
+
+***
+
+#### Centralization
+
+Centralization, in contrast, tells us about the degree of inequality in node-level measures. The most common metric is degree centralization; it ranges from 0 (where all nodes' degree values are the same), to 1 (where there is perfect inequality among scores). 
+
+```{r}
+centr_degree(bank_net)$centralization
+```
+
+As we can see, there is pretty stark inequality here (this was a bit observable in the earlier degree distribution we explored). Importantly, though, you can get centralization for other node-level measures like betweenness.
+
+```{r}
+centr_betw(bank_net)$centralization
+```
+
+Inequality in this score is much lower than in degree, which tells us a bit about the relationship between the two distributions in our observed network. 
+
+***
+
+#### Path Lengths
+
+In many cases, this relationship hinges on another feature of networks: the average path length between any two nodes in the network. Remember that old 'six-degrees of separation' idea? This is where that came from. Average path length tells us the mean distance across all pairs of nodes, even those which are not directly connected.
+
+```{r}
+average.path.length(bank_net)
+```
+
+For cross-border banking, it's only about two hops from one country to another - this helps to understand why degree inequality may be so high when betweenness inequality is so low; nodes are generally very close to each other, and some are simply more connected than others. Importantly, you can also calculate pair-specific distances in a full $n*n$ matrix, which can be helpful for actor-specific distance considerations against the broader average (are some closer, farther from others, on average?):
+
+```{r}
+dist_mat<-distances(bank_net)
+(dist_mat[1:5,1:5])
+mean(dist_mat[5,])
+```
+
+As we can gather just from the UK row, it is significantly closer to other countries in the cross-border banking network than the average. Who ever thought being a global financial center could be an empirical question!
+
+***
+
+#### Topology over Time
+
+These are interesting and fun for 1990, but maybe we'd like to see how these measures change over time. This can be easily operationalized within a for-loop over the years of data for which you have network observations:
+
+```{r,out.width = '100%',out.height='100%'}
+years<-min(bank_edge$year):max(bank_edge$year)
+topog_df<-data.frame(Year=years,Density=NA,DegCent=NA,BetwCent=NA,AvgPath=NA)
+for(y in years){
+  net<-graph.data.frame(bank_edge[which(bank_edge$year==y),c(1:2,4)])
+  topog_df[which(topog_df$Year==y),2:5]<-c(graph.density(net),
+                                           centr_degree(net)$centralization,
+                                           centr_betw(net)$centralization,
+                                           average.path.length(net))
+}
+par(mfrow=c(2,2))
+plot(topog_df$Year,topog_df$Density,"l",col="blue",xlab="Year",ylab="Density")
+plot(topog_df$Year,topog_df$DegCent,"l",col="red",xlab="Year",ylab="Deg. Centr.")
+plot(topog_df$Year,topog_df$BetwCent,"l",col="green",xlab="Year",ylab="Betw. Centr.")
+plot(topog_df$Year,topog_df$AvgPath,"l",col="purple",xlab="Year",ylab="Avg. Path")
+```
+
+How delicious! We can clearly see some trends are in inherent tension, like density and centralization indicators. We can also tell that average path length drops as density increases, which follows intuitive logic about graph connectedness. As you can imagine, there are a broad number of other things you can do with these indicators for both descriptive and inferential applications. Given our limited time, it's best we move forward into another, possibly more relevant network, to explore community detection in networks.
+
+***
+
+# Mapping Out Your Social Space
+
+Let's take a first run with a fun dataset that hits close to home. I've scraped the Political Science website for information on graduate students' reported subfields, and compiled this into a network dataset for our exploration:
+
+```{r}
+load("subfield_adjacency_matrix.RData")
+subfield_adjacency[1:6,1:4]
+```
+
+This is a very different kind of network data structure, and a very different kind of network. The structure is an *adjacency matrix*, which reports the presence or absence (and if present, weight) of relationships between all actors in a specified social space. This is especially useful for the kind of network we're modeling here, a *bimodal network* (also called a two-mode network). Unlike the earlier banking network, which showed relationships between one type of entity, this maps relationships between two types: students and subfields. 
+
+We can plot this just as the bimodal network in the same way we have before, building instead from an adjacency matrix using the 'graph.incidence()' command:
+
+```{r,out.width = '100%',out.height='100%'}
+subNet0<-graph.incidence(as.matrix(subfield_adjacency)) 
+V(subNet0)$color<-"red" #First, all nodes red 
+#Then, identify students among nodes, and color them light blue#
+students<-which(V(subNet0)$name %in% row.names(subfield_adjacency))
+V(subNet0)$color[students]<-"light blue"
+net_plot(subNet0,sizes=F,layout=layout_with_kk(subNet0),
+         title="Student-Subfield Bimodal Network")
+```
+
+We now have a relational map of disciplinary interests among students! Quite cool (in my opinion). However, maybe we are interested in the relationships between one type of node, based on their shared connections with the other type. This is called 'collapsing' to a one-mode network, like the banking network we toyed with above. 
+
+***
+
+## Collapsing to One Mode Networks
+
+This requires just a teensy bit of matrix algebra. There are some commands for this in igraph that I'll demonstrate after, but it's always good to learn how to do this manually first (for the mechanics!). 
+
+***
+
+### Manually: Adjacency Matrix Multiplication
+
+Basically, to collapse the non-square matrix into a square, one-mode matrix, we simply multiply the transverse by the original. However, the directionality of this equation tells us *which* one-mode network we will get! Here's how we would get the matrix for student-student connections, by (i) converting the original adjacency object to a matrix, and (ii) multiplying it by its transverse:
+
+```{r}
+sa0<-as.matrix(subfield_adjacency) 
+sa1<-sa0 %*% t(sa0)
+sa1[1:5,1:5]
+```
+
+The diagonal of this matrix is simply the number of subfields that a person shares with themself - thus, the number they reported on their student profile online. We can set this to 0 when we build our network to remove 'loops', or self-ties:
+
+```{r,out.width = '100%',out.height='100%'}
+diag(sa1)<-0
+student_net<-graph.adjacency(sa1,mode="undirected",weighted=T)
+net_plot(student_net,sizes=F,layout=layout_with_kk(student_net),
+         title="Student Network by Shared Subfields")
+```
+
+How cool! Maybe we want the opposite, mapping relationships among subfields by shared student membership? We simply reverse the equation:
+
+```{r}
+sa2<-t(sa0) %*% sa0
+sa2[1:4,1:4]
+```
+
+Now, the diagonal tells us how many students are in each subfield (which could be informative, but also more easily identified). Let's map it!
+
+```{r,out.width = '100%',out.height='100%'}
+diag(sa2)<-0
+subfield_net<-graph.adjacency(sa2,mode="undirected",weighted=T)
+keep_names<-c("Comparative Politics","International Relations",
+              "American Politics","Methodology & Formal Theory")
+V(subfield_net)$name<-ifelse(V(subfield_net)$name %in% keep_names,
+                             V(subfield_net)$name,NA)
+net_plot(subfield_net,labels=T,layout=layout_with_kk(subfield_net),
+         title="Subfield Network by Shared Student")
+```
+
+Notice the way we selectively kept names, as earlier, to make this legible. Let's check some interesting statistics about these networks:
+
+```{r}
+get_stats<-function(network){return(c(graph.density(network),
+                                      centr_degree(network)$centralization,
+                                      average.path.length(network)))}
+netStats<-data.frame(cbind(c(get_stats(subNet0)),
+                           c(get_stats(student_net)),
+                           c(get_stats(subfield_net))),
+                     row.names=c("Density","Centralization","Avg.Path"))
+names(netStats)<-c("Bimodal Network","Student Network","Subfield Network")
+netStats
+```
+
+***
+
+### The Built-In Approach
+
+As I promised, here are the built-in commands for collapsing a two-mode into a one-mode network. It's a bit clunky. First, you get the 'type' of node, which the command grabs from the network (note: you have to use graph.incidence for this to work). Then you use the second command to collapse by type into a new network:
+
+```{r}
+V(subNet0)$type<-bipartite_mapping(subNet0)$type
+bipartite_projection(subNet0)
+```
+
+Notice, the second command produces a list. You can simply assign the output to a new network object, like this:
+
+```{r}
+example1<-bipartite_projection(subNet0)$proj1
+example1
+```
+
+But, as you all know, it's usually better to do things yourself than to trust software (I've found this can sometimes be a glitchy approach to collapsing networks, but of course, go with your gut).
+
+***
+
+## Identifying Community Structures
+
+Both of these one-mode projections capture relational dynamics of our department. As we well know, these subfields often produce distinctive communities of students; we understand this intuitively by class work, but can measure it empirically with these network objects. There are several ways of identifying community structures in networks; we're going to start with three that traverse different levels of sophistication and community logics:
+
+  1. Walk-Trap Communities;
+  2. Edge Betweenness Communities;
+  3. Spinglass Communities
+
+***
+
+### Walk-Trap Communities
+
+This community detection process works from a basic assumption about relational clustering; if you start anywhere in a network and take some number of 'steps' across edges, communities can be identified by the groups where you typically get stuck in that walk. So, it relies only on a parameter of steps and the network to plug in. As you can likely imagine, the higher the step count, the lower the average 'modality', or optimal community counts. You can then use the 'membership' vector it returns to show you which node belongs to which inductively-identified community: 
+
+```{r}
+wtOut<-cluster_walktrap(student_net,steps=4)
+wtOut$membership
+```
+
+Let's look at the network, coloring nodes by their community membership to see how it worked:
+
+```{r,message=FALSE,out.width = '100%',out.height='100%'}
+# install.packages("RColorBrewer")
+library(RColorBrewer)
+cols<-data.frame(comm=unique(wtOut$membership),
+                 col=brewer.pal(length(unique(wtOut$membership)),"Set3"))
+V(student_net)$color<-cols$col[match(wtOut$membership,cols$comm)]
+net_plot(student_net,sizes=F,layout=layout_with_kk(student_net),
+         title="Student Network with Walk Trap Communities")
+```
+
+Intriguing! It seems to have given us some pretty relevant groupings. We can also plot the communities differently using the actual object from the community detection output:
+
+```{r,out.width = '100%',out.height='100%'}
+plot(wtOut,student_net,vertex.label=NA,vertex.size=5,
+     main="Student Network with Walk Trap Communities")
+```
+
+Let's explore what subfields this may have captured:
+
+```{r}
+commMat<-matrix(0,nrow=nrow(subfield_adjacency),
+                ncol=length(unique(wtOut$membership)))
+for(i in 1:nrow(commMat)){commMat[i,wtOut$membership[i]]<-1}
+t(subfield_adjacency) %*% commMat
+```
+
+Interesting; comparative and IR are heavily grouped in community 1, with Americanists falling primarily into community 2 with political behavior. Communities three and four seem more like grab-bags in the inductive output, capturing some comparativists, theorists, and some of the non-primary subfields. You might consider running this again with a different number of steps to see how it shakes out!
+
+***
+
+### Edge Betweenness Communities
+
+Another way of identifying communities is a bit more nuanced, and focuses on the role of edge betweenness. The basic logic is that edges with high betweenness (not to be confused with node betweenness; these are edges that connect the most shortest paths) can help to identify communities with high levels of inter-connectedness. Unlike the walk-trap, which blindly traverses the network, this identifies communities by systematically removing high-betweenness edges and finding what subgraphs result from it. Because this is computationally expensive as the edge count increases (and produces higher numbers of communities as well), let's try it on the subfield network with a new plotting approach:
+
+```{r,out.width = '100%',out.height='100%'}
+subfield_net<-graph.adjacency(sa2,mode="undirected",weighted=T)
+ebOut<-cluster_edge_betweenness(subfield_net)
+plot(ebOut,subfield_net,vertex.label=NA,edge.arrow.size=0.05,
+     vertex.size=5,layout=layout_with_kk(subfield_net),
+     edge.curved=seq(-0.5,0.5,length=ecount(subfield_net)),
+     main="Subfield Network by Betweenness Communities")
+```
+
+We got two distinct communities here - and notice that this plotting approach shows us red edges that *cross* communities and black edges *within* communities. Which subfields are in which community?
+
+```{r}
+data.frame(Subfield=V(subfield_net)$name,
+           Community=ebOut$membership)
+```
+
+***
+
+### Getting Fancy: Spinglass Communities
+
+There are some pretty advanced community detection techniques as well. This is the third and finall we'll review, but you can find a broad number of them in the igraph documentation online. Spinglass detection attempts to resolve the two issues each of the previous ones addressed: balancing communities with high levels of interconnection and low levels of cross-community connections. This calls for a number of 'spins' which  operates as a maximum number of communities to identify dimensionally.
+
+```{r,out.width = '100%',out.height='100%'}
+sgOut<-spinglass.community(student_net,spins=10)
+cols<-data.frame(comm=unique(sgOut$membership),
+                 col=brewer.pal(length(unique(sgOut$membership)),"Set3"))
+V(student_net)$color<-cols$col[match(sgOut$membership,cols$comm)]
+net_plot(student_net,sizes=F,layout=layout_with_kk(student_net),
+         title="Student Network with Spinglass Communities")
+plot(sgOut,student_net,vertex.label=NA,vertex.size=5,
+     main="Student Network with Spinglass Communities")
+```
+
+Interesting, and different results again! How does this fold into subfields?
+
+```{r}
+commMat<-matrix(0,nrow=nrow(subfield_adjacency),
+                ncol=length(unique(sgOut$membership)))
+for(i in 1:nrow(commMat)){commMat[i,sgOut$membership[i]]<-1}
+t(subfield_adjacency) %*% commMat
+```
+
+Notice how the groupings depend *enormously* on the algorithm you choose to model them. This boils to a more central point about community detection in networks (and network analysis more generally): the underlying assumptions of your measures inherently determine what you will find. You should always choose the algorithm for community detection by what *type* of community emergence you expect!
+
+***
+
+# A Very Brief Introduction to Statistical Network Testing
+
+It is important to acknowledge that network analysis is not well-suited for causal inference. This is a strength, not a weakness of the approach. However, this does not mean that some broader logics of causal inference have not been folded into network analytic techniques. These rely on an older idea about network analysis: we can glean topological information about observed networks by comparing them to purely random networks with similar dimensions. This was developed in a paper by Erdos and Renyi, and serves as the foundation of virtually all network statistical techniques (for extensions, see work by Barabasi on why this may not be a solid foundation for inference). 
+
+For a very, very basic introduction, we will review two techniques in different packages:
+
+  1. Conditional Uniform Graph (CUG) Tests;
+  2. Exponential Random Graph Models (ERGMs)
+  
+***
+
+## CUG (k-ooh-g) Tests
+
+This is basically a bootstrap approach for testing graph-level indicators against random graph expectations. We have to switch packages to another one, *sna*, which has stronger commands for this line of analysis. Let's test on a parameter we haven't reviewed yet, *transitivity*, which measures the degree of triadic closure in a network (proportion of closed triangles). In igraph, the command is simply 'transitivity(network)'. When we run a CUG test, we control for some measure of network topography. For this first run, we'll control on size (number of nodes), which tells the random network bootstrapping how to construct the random networks.
+
+```{r,warning=F,message=FALSE,out.width = '100%',out.height='100%'}
+# install.packages("sna")
+library(sna)
+cug1<-cug.test(sa1,sna::gtrans,reps=1000,
+               mode="graph",cmode="size")
+cug1
+plot(cug1)
+```
+
+Notice that our student network is significantly *more* transitive than a random graph would suggest. Also notice that this is somewhat trivial, given that the nulls all hover at 50% triadic closure with this control. You can also control for edge count (cmode="edges") and the dyad population (cmode="dyad.census"), and test other topography indicators from SNA like centralization. 
+
+***
+
+## ERGMs
+
+Exponential random graph models are a much more recent advancement in network statistics. These are basically regression models which treat the entire network as the unit of analysis, and predict likelihoods of ties as a feature of node, edge, and graph-level covariates. Let's run a super-basic example on our student network testing only on edges (which functionally serves as an intercept by this logic):
+
+```{r,message=FALSE}
+# install.packages("statnet")
+library(statnet)
+net<-network(sa1,directed=F)
+m1<-ergm(net ~ edges)
+summary(m1)
+```
+
+We can add a number of other interesting network covariates, like node attributes. For example, maybe we're interested in the propensity for ties based on whether nodes are in the Americanist subfield:
+
+```{r,message=FALSE,warning=F}
+set.vertex.attribute(net,"Comparative",subfield_adjacency[,1])
+set.vertex.attribute(net,"Theory",subfield_adjacency[,2])
+set.vertex.attribute(net,"IR",subfield_adjacency[,3])
+set.vertex.attribute(net,"American",subfield_adjacency[,4])
+set.vertex.attribute(net,"Methods",subfield_adjacency[,5])
+set.vertex.attribute(net,"SFCount",rowSums(subfield_adjacency))
+m2<-ergm(net ~ edges + nodecov("Comparative") + 
+           nodecov("Theory") + nodecov("IR") + 
+           nodecov("American") + nodecov("Methods") + 
+           nodecov("SFCount"))
+summary(m2)
+```
+
+There are [many, many, many parameters you can incorporate into ERGMs](https://rdrr.io/cran/ergm/man/ergm-terms.html). We are not going to review those here for two reasons. First, the majority of structural parameters (like edgewise shared partners) take a while to optimize via MCML, especially with large networks. Second, and on a broader point, these models very often fail to converge. 
+
+As such, this introduction is more of a cautionary one; most extensions of the ERGM family of models make strong assumptions about network structure that should be carefully tested with descriptive statistics before trying to incorporate into these tests for inference. However, even these node level attributes can be informative for thinking about linkage propensity.  

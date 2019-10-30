@@ -192,7 +192,7 @@ ggsave("[ADD CODE]")
 
 ## 3.3. (Optional) Callenge 2
 
-Write 
+Write a function that creates a heatmap for a given variable and region. 
 
 ```{r}
 # ADD CODE
@@ -267,7 +267,6 @@ gen_heatmap_wb(dat = wb_dat,
                fill_var = "mort_rate_under5", 
                var_title = "Child (under 5) Mortality Rate",
                var_scale = "per 1,000 live births")
-
 
 gen_heatmap_wb(dat = wb_dat, 
                fill_var = "mort_rate_under5", 
