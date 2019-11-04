@@ -20,7 +20,7 @@ For our purposes, the two most important pieces of hardware are the **processor/
 
 > Sidenote: Files (e.g. R data files, csv files, this file, etc.) are stored on your computer's harddrive. Computers either have hard disk drives (HDD) or solid state drives (SSD). Saving your OS on a SSD is faster than an HDD; however, reading data into R from an SSD or an HDD usually does not have a large effect on speed. If you don't have enough long-term memory for a file, you certainly don't have enough RAM. Getting more long-term memory will be much cheaper to solve than getting more RAM or a faster CPU. 
 
-Open up your control panel (Windows) or task manager (Mac). Use interface to look at your CPU and RAM. Note the speed and how many cores/processors you have under the CPU information. Note how many GB of RAM you have available and in use. 
+Open up your task manager. Use interface to look at your CPU and RAM. Note the speed and how many cores/processors you have under the CPU information. Note how many GB of RAM you have available and in use. 
 
 Your RAM will limit how large of files you can load into R. To manipulate data in R, it must be loaded into memory (RAM). The size of your RAM limits the size of files you can manipulate in R at one time.  
 
