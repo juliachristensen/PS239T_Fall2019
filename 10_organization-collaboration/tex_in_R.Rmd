@@ -1,0 +1,68 @@
+---
+title: "Research Note"
+subtitle: "(Preliminary Findings, Do not cite or circulate)"
+author: "Anustubh Agnihotri^[Department of Political Science, UC Berkeley. Email; anustubh@berkeley.edu]"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  pdf_document:
+    keep_tex: yes
+    latex_engine: lualatex
+    number_sections: yes
+    toc: no
+fontsize: 11pt    
+linestretch: 1.0
+lof: False
+lot: False
+site: bookdown::bookdown_site
+documentclass: article
+bibliography: ['one.bib']
+biblio-style: 
+geometry: "left=1in, right=1in, top=1in, bottom=1in"
+indent: false
+header-includes: 
+- \usepackage{graphicx}
+- \usepackage{float}
+- \usepackage{amsmath}
+- \usepackage{color}
+---
+
+# Introduction
+
+Introduce the topic
+
+# Theoretical Motivations
+
+
+  
+## Existing Literature
+
+
+
+
+
+## Dataset 
+
+Draw a table
+
+
+\begin{table}[h]
+\caption{Table for Class}
+\begin{center}
+\resizebox{.75\textwidth}{!}{
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+Header1 & Header2         & Header3 & Header4  & Header5    \\ \hline
+ABD          &  A & 123   & 11/1/2015  & 12/5/2016  \\ \hline
+ABD          &  B & 12   & 13/5/2016  & Present    \\ \hline
+XYZ          &  C & 456   & 1/5/2017   & 19/12/2017 \\ \hline
+XYZ          &  A & 12345   & 20/12/2017 & 19/6/2018  \\ \hline
+XYZ          &  D & 11   & 20/6/2018  & Present    \\ \hline
+\end{tabular}}
+\label{table:testtable}
+\end{center}
+\end{table}
+
+
+
+
+#References

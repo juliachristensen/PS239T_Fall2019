@@ -1,0 +1,52 @@
+---
+title: "Using_Markdown"
+author: "A new beginning"
+date: "November 3, 2019"
+output: 
+    pdf_document:
+      toc: true
+      number_sections: true
+bibliography: ["one.bib"]
+biblio-style: "apalike"
+link-citations: true
+---
+#Installation 
+
+Make sure you have installed Markdown and Tinetex before getting started. See [link](https://bookdown.org/yihui/rmarkdown/installation.html) for details.
+
+#Introduction
+
+This is a paragraph in an R Markdown document.
+
+Below is a code chunk:
+
+
+##Figure
+```{r, fig.cap="A Simple Regression", out.width='55%', fig.align='center'}
+fit = lm(dist ~ speed, data = cars)
+b   = coef(fit)
+plot(cars)
+abline(fit)
+```
+
+
+The slope of the regression is `r b[1]`.
+
+
+##Formula
+$$\begin{array}{ccc}
+x_{11} & x_{12} & x_{13}\\
+x_{21} & x_{22} & x_{23}
+\end{array}$$
+
+
+##Table
+```{r tables-mtcars}
+knitr::kable(iris[1:5, ], caption = 'A caption')
+```
+
+##Citation
+Cite @R-knitr
+
+
+#References
