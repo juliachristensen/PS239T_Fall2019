@@ -3,22 +3,31 @@
 
 ## 1. Sequential vs. Parallel Processing 
 
+In order to process really large datasets, you will almost certainly need to use parallel processing. While parallel processing is a powerful tool, it is not always an option. 
+
 **Sequential processing:** Alternatively referred to as serial processing, sequential processing is a term used to describe the processing that occurs in the order that it is received. Sequential processing is in contrast to parallel processing or multitasking.
 
 **Parallel procesing:** Parallel processing is the method of evenly distributing computer processes between two or more computer processors. This requires a computer with multiple CPUs, or a CPU (or GPU) equipped with multiple cores. It also requires an operating system capable of supporting parallel processing, or software written specifically to process tasks in parallel.
-	* You may also hear the term multi-thread processing. For our purposes, the distinction between parallel processing and multi-thread processing isn't critical. 
 
 Source: https://www.computerhope.com/jargon.htm
+
+> Sidenote: You may also hear the term multi-thread processing. For our purposes, the distinction between parallel processing and multi-thread processing isn't critical. 
+
 
 ## 2. Hardware 
 
 For our purposes, the two most important pieces of hardware are the **processor/CPU** and the **short-term memory/RAM**. 
+
+> Sidenote: Files (e.g. R data files, csv files, this file, etc.) are stored on your computer's harddrive. Computers either have hard disk drives (HDD) or solid state drives (SSD). Saving your OS on a SSD is faster than an HDD; however, reading data into R from an SSD or an HDD usually does not have a large effect on speed. If you don't have enough long-term memory for a file, you certainly don't have enough RAM. Getting more long-term memory will be much cheaper to solve than getting more RAM or a faster CPU. 
 
 Open up your control panel (Windows) or task manager (Mac). Use interface to look at your CPU and RAM. Note the speed and how many cores/processors you have under the CPU information. Note how many GB of RAM you have available and in use. 
 
 Your RAM will limit how large of files you can load into R. To manipulate data in R, it must be loaded into memory (RAM). The size of your RAM limits the size of files you can manipulate in R at one time.  
 
 The CPU processes all of our code and determines how fast the code can run. However, not all code is equal. To anticipate how long something takes to run, you need to know whether your program is running sequentially or parallel. Most R packages run sequentially. 
+* Modern CPUs seem to be emphasizing the number rather than the speed of cores. For parallel computing, this makes sense. However, for most of our R code, we want faster cores more than we want more cores. 
+
+> Sidenote: To implement parallel processing in R, google 'parallel processing in R' and look for a recent vignette, blog post, or stack overflow post. The packages have changed over the last few years and will likely continue to change if parallel processing becomes more popular in R. 
 
 
 ## 3. General tips for using big data 
@@ -42,8 +51,8 @@ Here are some important questions to ask:
 2. Can the data be loaded into memory?
 	* This depends on how you plan on analyzing your data.
 	* R has to load the whole dataset into memory (RAM) in order to perform an analysis.
-	* Most laptops have 4-16 GB or RAM. You can only load a dataset that is as large as your RAM. True computer scientists can have access to massive amounts of RAM (there is a rumor in my house that one of my roommates has access to a 4 TB AWS workspace). 
-For some types of analysis (i.e. calculating totals), you can load part of the dataset into memory, run the analysis for that part, save the result, and then load a new piece of the dataset and repeat. 
+	* Most laptops have 4-16 GB or RAM. You can only load a dataset that is as large as your RAM. True computer scientists can have access to massive amounts of RAM. 
+	* For some types of analysis (i.e. calculating totals), you can load part of the dataset into memory, run the analysis for that part, save the result, and then load a new piece of the dataset and repeat. 
 	* If you're analysis can be broken up, you should also look into parallel processing. 
 	* Using distributed computing options and supercomputers usually requires parallel processing. These systems complete large tasks by splitting them up and running them at the same time across many smaller computing environments. 
 3. How much security do you need? 
