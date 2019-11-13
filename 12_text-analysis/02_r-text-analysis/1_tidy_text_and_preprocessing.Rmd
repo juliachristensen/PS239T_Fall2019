@@ -27,13 +27,23 @@ This idea is the foundation for everything we do in computational text analysis.
 
 # Setup
 ```{r}
-
+# remove all objects
 rm(list=ls())
 
-require(tm) # for text mining
-library(tidyverse) # for tidyverse
-library(tidytext) # for tidy text analysis
-library(quanteda) # for text analysis and examples
+# check working directory
+getwd()
+
+# Unload all packages 
+library(pacman)
+pacman::p_unload(all)
+
+# Add packages 
+pacman::p_load(
+  tidyverse, #ggplot, dplyr, readr, etc.
+  tm, #text mining
+  tidytext, #text analysis
+  quanteda #text analysis examples
+)
 ```
 
 # Corpus
@@ -48,11 +58,10 @@ For this exercise, we play with Martin Luther King Jr's "I have a dream" speech.
 
 ```{r}
 # load MLK speech
-
 MLK <- readLines("http://www.sthda.com/sthda/RDoc/example-files/martin-luther-king-i-have-a-dream-speech.txt")
 
+# look at first 10 cells
 MLK[1:10]
-
 ```
 
 ## Tidy text
@@ -61,7 +70,6 @@ MLK[1:10]
 - It's better than built-in data frame since it does not convert strings to factors.
 
 ```{r}
-
 # tidy text
 MLK_df <- data_frame(line = 1:length(MLK), text = MLK) 
 
@@ -70,7 +78,6 @@ MLK_df
 
 # see class
 class(MLK_df) 
-
 ```
 
 # Preprocessing 
@@ -96,10 +103,22 @@ From now on, we use the US presidential inaugural address texts from quanteda pa
 # load data 
 inaug <- tidy(data_corpus_inaugural)
 
+head(inaug)
+
+# Tokenize data 
 inaug %>%
   group_by(President) %>%
   unnest_tokens(word, text)
+# Note the structure of this data 
 ```
+
+### CHALLENGE 1: Tokenize MLK speech by line 
+
+```{r, eval=F}
+MLK_df %>%
+  # add your code here
+```
+
 
 ## Using N-grmas
 N-gram is a consecutive sequence of words.
@@ -134,6 +153,7 @@ inaug_filtered %>%
 ```
 
 ## Normalizing
+
 ### Stop words 
 
 - Remove common words (something like "the") not useful for the analysis
@@ -201,7 +221,6 @@ inaug_words
 ```
 
 Note that the plot below proves Zipf's law: the frequency that a word appears is inversely proportional to its rank. As we learn later, this insight is key to the understanding of how topic modeling works. In most cases, we need only a few number of topics because on a few words will have lots of examples.
-
 
 ```{r}
 

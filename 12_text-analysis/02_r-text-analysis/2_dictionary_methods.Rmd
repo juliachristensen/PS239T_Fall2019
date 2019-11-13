@@ -9,19 +9,29 @@ The following material is adapted from [Text Mining with R](https://proquest.saf
 
 # Setup
 ```{r}
-
+# remove all objects
 rm(list=ls())
 
-# load packages
-require(tm) # for text mining
-library(tidyverse) # for tidyverse
-library(tidytext) # for tidy text analysis
-library(quanteda) # for text analysis and examples
-library(wordcloud) # for wordcloud
-library(stringr) # for string manipulation
-library(reshape2)
+# check working directory
+getwd()
 
-# load data 
+# Unload all packages 
+library(pacman)
+pacman::p_unload(all)
+
+# Add packages 
+pacman::p_load(
+  tidyverse, #ggplot, dplyr, readr, etc.
+  tm, #text mining
+  tidytext, #text analysis
+  quanteda, #text analysis examples
+  wordcloud, #word clouds
+  stringr, #string manipulation
+  reshape2,
+  textdata
+)
+
+# load data on presidential inaguration speeches 
 inaug <- tidy(data_corpus_inaugural)
 ```
 
