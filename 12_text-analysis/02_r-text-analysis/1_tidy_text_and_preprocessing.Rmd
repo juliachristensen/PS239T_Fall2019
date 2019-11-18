@@ -109,15 +109,29 @@ head(inaug)
 inaug %>%
   group_by(President) %>%
   unnest_tokens(word, text)
-# Note the structure of this data 
 ```
 
-### CHALLENGE 1: Tokenize MLK speech by line 
+Let's take a moment to look at what this tokenized dataset looks like. Note we've created a line for every tokenized word. 
+
+Look up the package documentation to get a better idea what this function is doing... 
+
+unnest_tokens(
+  tbl, #we are piping in our dataset
+  output, #what we want to call the output column 
+  text, #input column, aka what we want to tokenize 
+  token="words", #default token type is words 
+  ...
+)
+
+
+### Challenge 1: Tokenize MLK speech by line 
 
 ```{r, eval=F}
 MLK_df %>%
   # add your code here
 ```
+
+To practice using the techniques in this document, continue to adapt the code for the MLK dataset. 
 
 
 ## Using N-grmas
@@ -169,7 +183,7 @@ MLK_df %>%
 
 ```{r}
 # load stopwords dataset
-data(stopwords) 
+data(stop_words)
 
 # apply stopwords
 MLK_df %>%
@@ -261,7 +275,6 @@ inaug_words %>%
     labs(x = NULL, y = "tf-idf") +
     facet_wrap(~President, ncol = 3, scales = "free") +
     coord_flip()
-
 ```
 
 

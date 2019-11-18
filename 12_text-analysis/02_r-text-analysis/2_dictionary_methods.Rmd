@@ -67,8 +67,8 @@ inaug %>%
   filter(Year > 1945) %>%
   unnest_tokens(word, text) %>%
   inner_join(get_sentiments("afinn")) %>%
-  count(President, Year, score) %>%
-  ggplot(aes(x = score, y = n, col)) +
+  count(President, Year, value) %>%
+  ggplot(aes(x = value, y = n, col)) +
   geom_col(show.legend = FALSE) +
   facet_wrap(President ~ Year, scale = "free_y") +
   coord_flip()
@@ -139,7 +139,7 @@ inaug %>%
 
 ```{r}
 # create your own dictionary
-race_dictionary <- data.frame(word = c("african", "negro", "black", "asian", "oriental", "latino", "hispanic", "nonwhite"), category = c("Afircan Americans", "African Americans", "African Americans", "Asian Americans", "Asian Americans", "Latinx", "Latinx", "People of Color"))
+race_dictionary <- data.frame(word = c("african", "negro", "black", "asian", "oriental", "latino", "hispanic", "nonwhite"), category = c("African Americans", "African Americans", "African Americans", "Asian Americans", "Asian Americans", "Latinx", "Latinx", "People of Color"))
 
 class_dictionary <- data.frame(word = c("inequality","poverty","growth"), category = c("Distribution","Distribution","Growth"))
 # dictionary-based analysis
